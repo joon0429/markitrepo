@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { MainTabParamList, FeedStackParamList, CreateStackParamList, MessagesStackParamList, FriendsStackParamList, ProfileStackParamList } from './types';
 import FeedScreen from '@screens/feed/FeedScreen';
+import ListingDetailScreen from '@screens/feed/ListingDetailScreen';
 import CreateListingScreen from '@screens/listings/CreateListingScreen';
 import ConversationsScreen from '@screens/messages/ConversationsScreen';
 import FriendsScreen from '@screens/friends/FriendsScreen';
@@ -10,12 +11,13 @@ import ProfileScreen from '@screens/profile/ProfileScreen';
 import { colors } from '@constants/theme';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
+const FeedStack = createStackNavigator<FeedStackParamList>();
 
 // helper function to create simple stack navigators
-function createSimpleStack<T extends {}>(
-  Stack: any,
+function createSimpleStack(
+  Stack: ReturnType<typeof createStackNavigator>,
   screenName: string,
-  component: React.ComponentType<any>,
+  component: React.ComponentType<unknown>,
   title: string
 ) {
   return function StackNavigator() {
@@ -27,12 +29,22 @@ function createSimpleStack<T extends {}>(
   };
 }
 
-const FeedStackNavigator = createSimpleStack(
-  createStackNavigator<FeedStackParamList>(),
-  'Feed',
-  FeedScreen,
-  'feed'
-);
+function FeedStackNavigator() {
+  return (
+    <FeedStack.Navigator>
+      <FeedStack.Screen
+        name="Feed"
+        component={FeedScreen}
+        options={{ title: 'feed' }}
+      />
+      <FeedStack.Screen
+        name="ListingDetail"
+        component={ListingDetailScreen}
+        options={{ title: '' }}
+      />
+    </FeedStack.Navigator>
+  );
+}
 
 const CreateStackNavigator = createSimpleStack(
   createStackNavigator<CreateStackParamList>(),

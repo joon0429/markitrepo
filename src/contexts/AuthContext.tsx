@@ -21,7 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<MockUser | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, _password: string) => {
     setLoading(true);
     // mock sign in - simulate network delay
     await new Promise(resolve => setTimeout(resolve, 1000));

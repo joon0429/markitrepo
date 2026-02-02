@@ -1,6 +1,7 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import type { SerializableListing } from '@types';
 
 // root stack
 export type RootStackParamList = {
@@ -27,7 +28,7 @@ export type MainTabParamList = {
 // feed stack
 export type FeedStackParamList = {
   Feed: undefined;
-  ListingDetail: { listingId: string };
+  ListingDetail: { listing: SerializableListing };
   UserProfile: { userId: string };
 };
 

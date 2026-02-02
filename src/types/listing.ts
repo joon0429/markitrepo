@@ -39,3 +39,30 @@ export interface UpdateListingInput {
   closet?: string;
   visibility?: ListingVisibility;
 }
+
+// serializable version for navigation params
+export interface SerializableListing extends Omit<Listing, 'createdAt' | 'updatedAt'> {
+  createdAt: string;
+  updatedAt: string;
+}
+
+// helper functions to convert between types
+export function serializeListing(listing: Listing): SerializableListing {
+  return {
+    ...listing,
+    createdAt: listing.createdAt instanceof Date
+      ? listing.createdAt.toISOString()
+      : listing.createdAt.toDate().toISOString(),
+    updatedAt: listing.updatedAt instanceof Date
+      ? listing.updatedAt.toISOString()
+      : listing.updatedAt.toDate().toISOString(),
+  };
+}
+
+export function deserializeListing(listing: SerializableListing): Listing {
+  return {
+    ...listing,
+    createdAt: new Date(listing.createdAt) as never as Timestamp,
+    updatedAt: new Date(listing.updatedAt) as never as Timestamp,
+  };
+}
