@@ -13,10 +13,14 @@ export type {
 export { serializeListing, deserializeListing } from './listing';
 
 // Friend types
-export type { FriendRequest, FriendRequestStatus } from './friend';
+export type { Friend, FriendRequest, FriendRequestStatus, FriendRequestWithMutuals } from './friend';
 
 // Message types
-export type { Message, Conversation } from './message';
+export type { Message, Conversation, SerializableMessage, SerializableConversation } from './message';
+export { serializeMessage, deserializeMessage, serializeConversation, deserializeConversation } from './message';
 
 // Notification types
 export type { Notification, NotificationType } from './notification';
+
+// Profile types
+export type { Board, UserStats } from './profile';

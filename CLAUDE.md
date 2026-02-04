@@ -1,7 +1,7 @@
 # CLAUDE.md - project context & design system
 
 > this file is automatically read by claude code at the start of every conversation.
-> last updated: 2026-02-01
+> last updated: 2026-02-03
 
 ---
 
@@ -48,8 +48,12 @@
 - **feed browsing:** tabbed interface (friends vs friends+), pull-to-refresh, infinite scroll
 - **photo viewing:** swipeable carousel with dot indicators
 - **"mark.it" action:** soft reservation system - seller sees who marked
-- **messaging:** real-time chat tied to specific listings
+- **messaging:** real-time chat tied to specific listings with listing context card
 - **touch targets:** platform-native sizing (iOS HIG / Material Design standards)
+- **instagram-style UX:** profile with stats and boards grid, friends list with search, DM-style conversations
+- **search:** instant filtering (no debounce) for small datasets like friends list
+- **unread indicators:** blue dot + bold text for unread conversations/messages
+- **message bubbles:** blue background (right-aligned) for own messages, gray background (left-aligned) for others
 
 ### visual design
 
@@ -84,6 +88,9 @@
 | data model | denormalized Firestore | store seller info on listings to reduce reads; acceptable duplication at MVP scale | 2026-02-01 |
 | friends+ network | client-side filtering | Firestore doesn't support graph queries efficiently; acceptable for MVP scale (<100 friends) | 2026-02-01 |
 | payments | external (Venmo/Cash App) | no in-app payment for MVP; users coordinate externally | 2026-02-01 |
+| navigation types | serializable versions for complex objects | React Navigation can't handle Timestamp objects in params; create serializable versions with ISO strings | 2026-02-03 |
+| component organization | feature folders (profile/, friends/, messages/) | keeps related components grouped; easier to find and maintain than flat structure | 2026-02-03 |
+| instagram patterns | Material Top Tabs + list patterns | consistent with user expectations; tabs for friends/requests, listings/boards, etc. | 2026-02-03 |
 
 ### code conventions
 
@@ -104,6 +111,10 @@
 | scope creep during planning | initial feature discussions could expand infinitely | explicitly define MVP vs post-MVP features; skip analytics, QR codes, search, reputation system for v1 | 2026-02-01 |
 | emojis in documentation | used emojis in summaries and documentation | NEVER use emojis or emoticons anywhere in the project | 2026-02-01 |
 | improper text casing | capitalized regular text unnecessarily | keep regular text lowercase; use ALL CAPS or all lowercase for emphasis; exempt code/file names | 2026-02-01 |
+| navigation params with Timestamp | passed Timestamp objects in navigation params causing serialization errors | create serializable versions (SerializableConversation, SerializableMessage) with ISO string dates + helper functions | 2026-02-03 |
+| keyboard overlap in chat | keyboard covered message input without KeyboardAvoidingView | use KeyboardAvoidingView with platform-specific behavior (iOS: padding, Android: undefined) and offset | 2026-02-03 |
+| avatar spam in messages | showing avatar on every message from same sender | group consecutive messages; only show avatar on first message from each sender | 2026-02-03 |
+| image defaultSource with @assets | used defaultSource={require('@assets/icon.png')} causing bundler errors | remove defaultSource prop; rely on backgroundColor in styles as image fallback | 2026-02-03 |
 
 ---
 
@@ -145,8 +156,9 @@
 3. ~~create core TypeScript types~~
 4. ~~build navigation skeleton (hollow frame)~~
 5. ~~create placeholder screens with mock data~~
-6. implement UI framework without firebase (in progress)
-7. configure firebase later for backend integration
+6. ~~implement UI framework without firebase~~ (complete: Feed, Create, Profile, Friends, Messages/Chat)
+7. configure firebase for authentication and data persistence
+8. integrate firebase into existing screens
 
 ---
 
@@ -179,3 +191,18 @@
 - created listing components (ListingCard, PhotoCarousel)
 - implemented CreateListingScreen and ListingDetailScreen
 - set up mock data services for UI development without firebase
+
+### 2026-02-03 - phase 4-6 implementation (instagram-style screens)
+- created foundation components: Avatar (with sizes + fallback), SearchBar (instant filter + clear), EmptyState
+- implemented ProfileScreen: instagram-style profile with avatar, stats, bio, tabs (all listings / boards)
+- created profile components: ProfileHeader, BoardCard (2x2 grid preview), ProfileListingsGrid
+- implemented FriendsScreen: tabs (friends / requests), search with instant filtering, pull-to-refresh
+- created friends components: FriendListItem (mutual count + message button), FriendRequestItem (accept/decline)
+- extended types: Friend, FriendRequestWithMutuals with mutual friends count
+- implemented ConversationsScreen: sorted by recency, unread indicators (blue dot + bold text)
+- created ChatScreen: message bubbles, listing context card, keyboard handling, avatar grouping
+- created message components: ConversationListItem, MessageBubble, ListingContextCard, MessageInput
+- extended message types: SerializableMessage, SerializableConversation with helper functions for navigation
+- created comprehensive mock data: profiles (boards + stats), friends (7 friends + 3 requests), messages (4 conversations)
+- updated navigation: added ChatScreen to MessagesStack with proper types
+- all screens now instagram-style with Material Top Tabs, pull-to-refresh, empty states

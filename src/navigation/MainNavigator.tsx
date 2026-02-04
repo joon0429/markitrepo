@@ -6,12 +6,14 @@ import FeedScreen from '@screens/feed/FeedScreen';
 import ListingDetailScreen from '@screens/feed/ListingDetailScreen';
 import CreateListingScreen from '@screens/listings/CreateListingScreen';
 import ConversationsScreen from '@screens/messages/ConversationsScreen';
+import ChatScreen from '@screens/messages/ChatScreen';
 import FriendsScreen from '@screens/friends/FriendsScreen';
 import ProfileScreen from '@screens/profile/ProfileScreen';
 import { colors } from '@constants/theme';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const FeedStack = createStackNavigator<FeedStackParamList>();
+const MessagesStack = createStackNavigator<MessagesStackParamList>();
 
 // helper function to create simple stack navigators
 function createSimpleStack(
@@ -53,12 +55,22 @@ const CreateStackNavigator = createSimpleStack(
   'create'
 );
 
-const MessagesStackNavigator = createSimpleStack(
-  createStackNavigator<MessagesStackParamList>(),
-  'Conversations',
-  ConversationsScreen,
-  'messages'
-);
+function MessagesStackNavigator() {
+  return (
+    <MessagesStack.Navigator>
+      <MessagesStack.Screen
+        name="Conversations"
+        component={ConversationsScreen}
+        options={{ title: 'messages' }}
+      />
+      <MessagesStack.Screen
+        name="Chat"
+        component={ChatScreen}
+        options={{ title: 'chat' }}
+      />
+    </MessagesStack.Navigator>
+  );
+}
 
 const FriendsStackNavigator = createSimpleStack(
   createStackNavigator<FriendsStackParamList>(),

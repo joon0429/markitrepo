@@ -1,7 +1,7 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import type { SerializableListing } from '@types';
+import type { SerializableListing, SerializableConversation } from '@types';
 
 // root stack
 export type RootStackParamList = {
@@ -41,7 +41,7 @@ export type CreateStackParamList = {
 // messages stack
 export type MessagesStackParamList = {
   Conversations: undefined;
-  Chat: { conversationId: string; listingId: string };
+  Chat: { conversationId: string; conversation: SerializableConversation };
 };
 
 // friends stack

@@ -12,3 +12,19 @@ export interface FriendRequest {
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
+
+export interface Friend {
+  uid: string;
+  username: string;
+  displayName: string;
+  photoURL?: string;
+  mutualFriendsCount: number;
+  friendsSince: Date;
+}
+
+export interface FriendRequestWithMutuals extends Omit<FriendRequest, 'createdAt' | 'updatedAt'> {
+  fromPhotoURL?: string;
+  mutualFriendsCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
