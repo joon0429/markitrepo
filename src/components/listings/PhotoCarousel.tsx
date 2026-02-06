@@ -13,6 +13,7 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
+import PlaceholderImage from '@components/common/PlaceholderImage';
 import { colors, spacing } from '@constants/theme';
 
 interface PhotoCarouselProps {
@@ -85,11 +86,15 @@ export default function PhotoCarousel({ photos, onDoubleTap }: PhotoCarouselProp
               onPressIn={handleDoubleTap}
               style={styles.imageContainer}
             >
-              <Image
-                source={{ uri: photo }}
-                style={styles.image}
-                resizeMode="cover"
-              />
+              {photo === 'placeholder' || !photo ? (
+                <PlaceholderImage style={styles.image} />
+              ) : (
+                <Image
+                  source={{ uri: photo }}
+                  style={styles.image}
+                  resizeMode="cover"
+                />
+              )}
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -146,11 +151,15 @@ export default function PhotoCarousel({ photos, onDoubleTap }: PhotoCarouselProp
             >
               {photos.map((photo, index) => (
                 <View key={index} style={styles.fullscreenImageContainer}>
-                  <Image
-                    source={{ uri: photo }}
-                    style={styles.fullscreenImage}
-                    resizeMode="contain"
-                  />
+                  {photo === 'placeholder' || !photo ? (
+                    <PlaceholderImage style={styles.fullscreenImage} />
+                  ) : (
+                    <Image
+                      source={{ uri: photo }}
+                      style={styles.fullscreenImage}
+                      resizeMode="contain"
+                    />
+                  )}
                 </View>
               ))}
             </ScrollView>

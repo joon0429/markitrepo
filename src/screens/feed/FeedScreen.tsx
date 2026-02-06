@@ -74,26 +74,31 @@ export default function FeedScreen() {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textSecondary,
-        tabBarIndicatorStyle: { backgroundColor: colors.primary },
-        tabBarStyle: { backgroundColor: colors.background },
+        tabBarActiveTintColor: colors.text,
+        tabBarInactiveTintColor: colors.textTertiary,
+        tabBarIndicatorStyle: { backgroundColor: 'transparent' },
+        tabBarStyle: {
+          backgroundColor: colors.background,
+          elevation: 0,
+          shadowOpacity: 0,
+          borderBottomWidth: 0,
+        },
         tabBarLabelStyle: {
           fontSize: typography.fontSize.sm,
-          fontWeight: typography.fontWeight.semibold,
-          textTransform: 'lowercase',
+          fontWeight: typography.fontWeight.bold,
+          textTransform: 'none',
         },
       }}
     >
       <Tab.Screen
-        name="friends"
+        name="my friends"
         component={FriendsTab}
-        options={{ title: 'friends' }}
+        options={{ title: 'my friends' }}
       />
       <Tab.Screen
-        name="friends+"
+        name="friends of friends"
         component={FriendsPlusTab}
-        options={{ title: 'friends+' }}
+        options={{ title: 'friends of friends' }}
       />
     </Tab.Navigator>
   );
@@ -106,7 +111,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: spacing.xs,
-    paddingTop: spacing.sm,
+    paddingTop: spacing.xs,
     paddingBottom: spacing.xl,
   },
 });

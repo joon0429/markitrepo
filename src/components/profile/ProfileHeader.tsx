@@ -16,33 +16,43 @@ interface ProfileHeaderProps {
 export default function ProfileHeader({ user, stats, isOwnProfile, onAddFriend, onEditProfile }: ProfileHeaderProps) {
   return (
     <View style={styles.container}>
-      <View style={styles.topSection}>
+      {/* profile picture and stats row */}
+      <View style={styles.topRow}>
         <Avatar uri={user.photoURL} size="large" name={user.displayName} />
+
+        <View style={styles.statsContainer}>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{stats.listingCount || 54}</Text>
+            <Text style={styles.statLabel}>items</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{stats.followersCount || 2365}</Text>
+            <Text style={styles.statLabel}>followers</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{stats.followingCount || 2481}</Text>
+            <Text style={styles.statLabel}>following</Text>
+          </View>
+        </View>
       </View>
 
-      <Text style={styles.username}>{user.displayName}</Text>
-
-      <Text style={styles.stats}>
-        {stats.friendCount} friends • {stats.salesCount} sales
-      </Text>
-
-      <View style={styles.buttonRow}>
-        {isOwnProfile ? (
-          <TouchableOpacity style={styles.editButton} onPress={onEditProfile} activeOpacity={0.7}>
-            <Text style={styles.editIcon}>✏️</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity style={styles.addFriendButton} onPress={onAddFriend} activeOpacity={0.7}>
-            <Text style={styles.addFriendText}>+ add friend</Text>
-          </TouchableOpacity>
+      {/* username and bio */}
+      <View style={styles.infoSection}>
+        <Text style={styles.username}>{user.displayName}</Text>
+        {user.bio && (
+          <Text style={styles.bioText}>{user.bio}</Text>
         )}
       </View>
 
-      {user.bio && (
-        <View style={styles.bioSection}>
-          <Text style={styles.bioIcon}>📢</Text>
-          <Text style={styles.bioText}>{user.bio}</Text>
-        </View>
+      {/* edit profile button */}
+      {isOwnProfile ? (
+        <TouchableOpacity style={styles.editButton} onPress={onEditProfile} activeOpacity={0.7}>
+          <Text style={styles.editButtonText}>edit profile</Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity style={styles.addFriendButton} onPress={onAddFriend} activeOpacity={0.7}>
+          <Text style={styles.addFriendText}>add friend</Text>
+        </TouchableOpacity>
       )}
     </View>
   );
@@ -51,66 +61,70 @@ export default function ProfileHeader({ user, stats, isOwnProfile, onAddFriend, 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.background,
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
+  },
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  statsContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginLeft: spacing.lg,
+  },
+  statItem: {
     alignItems: 'center',
   },
-  topSection: {
-    marginBottom: spacing.sm,
+  statNumber: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text,
+  },
+  statLabel: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text,
+    marginTop: spacing.xs / 2,
+  },
+  infoSection: {
+    marginBottom: spacing.md,
   },
   username: {
-    fontSize: typography.fontSize.xl,
+    fontSize: typography.fontSize.md,
     fontWeight: typography.fontWeight.semibold,
     color: colors.text,
     marginBottom: spacing.xs,
   },
-  stats: {
+  bioText: {
     fontSize: typography.fontSize.sm,
-    color: colors.textSecondary,
-    marginBottom: spacing.md,
+    color: colors.text,
+    lineHeight: typography.fontSize.sm * 1.5,
   },
-  buttonRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginBottom: spacing.md,
+  editButton: {
+    width: '100%',
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.divider,
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+  },
+  editButtonText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text,
   },
   addFriendButton: {
-    paddingHorizontal: spacing.lg,
+    width: '100%',
     paddingVertical: spacing.sm,
     backgroundColor: colors.primary,
     borderRadius: borderRadius.md,
+    alignItems: 'center',
   },
   addFriendText: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.semibold,
     color: colors.background,
-  },
-  editButton: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.divider,
-    borderRadius: borderRadius.md,
-  },
-  editIcon: {
-    fontSize: typography.fontSize.md,
-  },
-  bioSection: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: colors.divider,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    width: '100%',
-  },
-  bioIcon: {
-    fontSize: typography.fontSize.md,
-    marginRight: spacing.sm,
-  },
-  bioText: {
-    flex: 1,
-    fontSize: typography.fontSize.sm,
-    color: colors.text,
-    lineHeight: typography.fontSize.sm * 1.5,
   },
 });

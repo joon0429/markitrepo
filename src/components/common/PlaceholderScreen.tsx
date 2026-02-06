@@ -16,8 +16,6 @@ export default function PlaceholderScreen({ title, description }: PlaceholderScr
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.description}>{description}</Text>
-      <Text style={styles.hint}>this is a hollow frame</Text>
-      <Text style={styles.hint}>firebase integration coming soon</Text>
 
       <View style={styles.actions}>
         <Button title="sign out" onPress={signOut} variant="outline" />

@@ -19,4 +19,6 @@ Keep the summary concise (bullet points).
 
 **ALL FUTURE WORK SHOULD REFER BACK TO THE CLAUDE.md FILE TO ENSURE WE DONT REPEAT MISTAKES OR REVERT PREVIOUS CHANGES**
 
+If the user provided specific context with this command, prioritize saving that information.
+
 $ARGUMENTS

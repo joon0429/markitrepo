@@ -53,13 +53,10 @@ export function validateForm(
 // common validation rules
 export const emailRule: ValidationRule = {
   required: true,
-  pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  message: 'invalid email format',
 };
 
 export const passwordRule: ValidationRule = {
   required: true,
-  minLength: 6,
 };
 
 export const displayNameRule: ValidationRule = {

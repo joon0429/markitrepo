@@ -1,33 +1,21 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { AuthNavigationProp } from '@navigation/types';
 import { useAuth } from '@contexts/AuthContext';
 import Button from '@components/common/Button';
 import Input from '@components/common/Input';
-import { validateForm, emailRule, passwordRule } from '@utils/validation';
 import { colors, spacing, typography } from '@constants/theme';
 
 export default function LoginScreen() {
-  const navigation = useNavigation<AuthNavigationProp>();
   const { signIn, loading } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
   const handleLogin = async () => {
-    const validationErrors = validateForm(
-      { email, password },
-      { email: emailRule, password: passwordRule }
-    );
-
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
+    if (!email || !password) {
       return;
     }
 
-    setErrors({});
     try {
       await signIn(email, password);
     } catch (error) {
@@ -54,7 +42,6 @@ export default function LoginScreen() {
             placeholder="your@email.com"
             keyboardType="email-address"
             autoCapitalize="none"
-            error={errors.email}
           />
 
           <Input
@@ -63,21 +50,11 @@ export default function LoginScreen() {
             onChangeText={setPassword}
             placeholder="enter password"
             secureTextEntry
-            error={errors.password}
           />
 
           <Button title="sign in" onPress={handleLogin} loading={loading} />
-
-          <Button
-            title="create account"
-            onPress={() => navigation.navigate('Signup')}
-            variant="outline"
-          />
         </View>
 
-        <Text style={styles.hint}>
-          this is a hollow frame - firebase not required yet
-        </Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );

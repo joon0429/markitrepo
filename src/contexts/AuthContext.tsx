@@ -11,7 +11,6 @@ interface AuthContextType {
   user: MockUser | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -35,20 +34,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   };
 
-  const signUp = async (email: string, password: string, displayName: string) => {
-    setLoading(true);
-    // mock sign up - simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // create mock user
-    setUser({
-      uid: 'mock-user-' + Date.now(),
-      email,
-      displayName,
-    });
-    setLoading(false);
-  };
-
   const signOut = async () => {
     setLoading(true);
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -57,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

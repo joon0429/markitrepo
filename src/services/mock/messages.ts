@@ -8,16 +8,16 @@ export const mockConversations: Conversation[] = [
     id: 'conv-1',
     listingId: 'listing-2',
     listingTitle: 'nike air max 97',
-    listingPhotoURL: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800',
+    listingPhotoURL: 'placeholder',
     participantIds: ['user-1', 'user-2'],
     participants: {
       'user-1': {
         username: 'sarah_parker',
-        photoURL: 'https://i.pravatar.cc/150?img=1',
+        photoURL: undefined,
       },
       'user-2': {
         username: 'alex_kim',
-        photoURL: 'https://i.pravatar.cc/150?img=2',
+        photoURL: undefined,
       },
     },
     lastMessage: {
@@ -36,16 +36,16 @@ export const mockConversations: Conversation[] = [
     id: 'conv-2',
     listingId: 'listing-3',
     listingTitle: 'airpods pro 2nd gen',
-    listingPhotoURL: 'https://images.unsplash.com/photo-1606841837239-c5a1a4a07af7?w=800',
+    listingPhotoURL: 'placeholder',
     participantIds: ['user-1', 'user-3'],
     participants: {
       'user-1': {
         username: 'sarah_parker',
-        photoURL: 'https://i.pravatar.cc/150?img=1',
+        photoURL: undefined,
       },
       'user-3': {
         username: 'jordan_lee',
-        photoURL: 'https://i.pravatar.cc/150?img=3',
+        photoURL: undefined,
       },
     },
     lastMessage: {
@@ -64,16 +64,16 @@ export const mockConversations: Conversation[] = [
     id: 'conv-3',
     listingId: 'listing-5',
     listingTitle: 'monstera deliciosa plant',
-    listingPhotoURL: 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=800',
+    listingPhotoURL: 'placeholder',
     participantIds: ['user-1', 'user-4'],
     participants: {
       'user-1': {
         username: 'sarah_parker',
-        photoURL: 'https://i.pravatar.cc/150?img=1',
+        photoURL: undefined,
       },
       'user-4': {
         username: 'taylor_wong',
-        photoURL: 'https://i.pravatar.cc/150?img=4',
+        photoURL: undefined,
       },
     },
     lastMessage: {
@@ -92,16 +92,16 @@ export const mockConversations: Conversation[] = [
     id: 'conv-4',
     listingId: 'listing-11',
     listingTitle: 'sony wh-1000xm5 headphones',
-    listingPhotoURL: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=800',
+    listingPhotoURL: 'placeholder',
     participantIds: ['user-1', 'user-3'],
     participants: {
       'user-1': {
         username: 'sarah_parker',
-        photoURL: 'https://i.pravatar.cc/150?img=1',
+        photoURL: undefined,
       },
       'user-3': {
         username: 'jordan_lee',
-        photoURL: 'https://i.pravatar.cc/150?img=3',
+        photoURL: undefined,
       },
     },
     lastMessage: {

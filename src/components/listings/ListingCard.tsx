@@ -1,16 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Listing } from '@types';
+import PlaceholderImage from '@components/common/PlaceholderImage';
 import { colors, spacing, typography } from '@constants/theme';
 
 interface ListingCardProps {
   listing: Listing;
   onPress: () => void;
 }
-
-const SCREEN_WIDTH = Dimensions.get('window').width;
-const CARD_MARGIN = spacing.sm;
-const CARD_WIDTH = (SCREEN_WIDTH - spacing.md * 3) / 2; // 2 columns with margins
 
 export default function ListingCard({ listing, onPress }: ListingCardProps) {
   const markCount = listing.markedBy.length;
@@ -21,39 +18,25 @@ export default function ListingCard({ listing, onPress }: ListingCardProps) {
       onPress={onPress}
       activeOpacity={0.9}
     >
-      <Image
-        source={{ uri: listing.photos[0] }}
-        style={styles.image}
-        resizeMode="cover"
-      />
+      <PlaceholderImage style={styles.image} />
 
-      <View style={styles.overlay}>
-        <View style={styles.content}>
-          <Text style={styles.title} numberOfLines={2}>
-            {listing.title}
+      <View style={styles.infoSection}>
+        <Text style={styles.title} numberOfLines={2}>
+          {listing.title}
+        </Text>
+
+        <Text style={styles.price}>${listing.price}</Text>
+
+        <View style={styles.footer}>
+          <Text style={styles.username} numberOfLines={1}>
+            {listing.sellerUsername}
           </Text>
 
-          <Text style={styles.price}>${listing.price}</Text>
-
-          <View style={styles.footer}>
-            <View style={styles.seller}>
-              {listing.sellerPhotoURL && (
-                <Image
-                  source={{ uri: listing.sellerPhotoURL }}
-                  style={styles.avatar}
-                />
-              )}
-              <Text style={styles.username} numberOfLines={1}>
-                {listing.sellerUsername}
-              </Text>
+          {markCount > 0 && (
+            <View style={styles.markBadge}>
+              <Text style={styles.markCount}>{markCount}</Text>
             </View>
-
-            {markCount > 0 && (
-              <View style={styles.markBadge}>
-                <Text style={styles.markCount}>♥ {markCount}</Text>
-              </View>
-            )}
-          </View>
+          )}
         </View>
       </View>
     </TouchableOpacity>
@@ -62,8 +45,8 @@ export default function ListingCard({ listing, onPress }: ListingCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    width: CARD_WIDTH,
-    margin: CARD_MARGIN,
+    flex: 1,
+    margin: spacing.xs,
     borderRadius: 12,
     backgroundColor: colors.background,
     overflow: 'hidden',
@@ -75,13 +58,10 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: CARD_WIDTH * 1.3, // aspect ratio for varied heights
-    backgroundColor: colors.border,
+    aspectRatio: 1,
   },
-  overlay: {
+  infoSection: {
     padding: spacing.sm,
-  },
-  content: {
     gap: spacing.xs,
   },
   title: {
@@ -101,18 +81,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: spacing.xs,
   },
-  seller: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    flex: 1,
-  },
-  avatar: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: colors.border,
-  },
   username: {
     fontSize: typography.fontSize.xs,
     color: colors.textSecondary,
@@ -122,7 +90,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs,
     paddingVertical: 2,
     borderRadius: 8,
-    backgroundColor: colors.error + '15', // semi-transparent red
+    backgroundColor: colors.error + '15',
   },
   markCount: {
     fontSize: typography.fontSize.xs,

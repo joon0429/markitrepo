@@ -13,7 +13,8 @@ export interface Listing {
   description: string;
   price: number;
   photos: string[];              // 1-4 Storage URLs
-  closet: string;                // User-defined category
+  closet: string;                // User-defined category/board name
+  category?: string;             // Optional category tag
 
   visibility: ListingVisibility;
   markedBy: string[];            // Array of user IDs who marked
@@ -29,6 +30,7 @@ export interface CreateListingInput {
   price: number;
   photoURIs: string[];           // Local URIs before upload
   closet: string;
+  category?: string;
   visibility: ListingVisibility;
 }
 

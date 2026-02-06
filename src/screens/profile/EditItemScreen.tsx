@@ -11,32 +11,48 @@ import {
   Alert,
   Switch,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { ProfileStackParamList } from '@navigation/types';
+import { mockListings } from '@services/mock/listings';
 import Button from '@components/common/Button';
 import Input from '@components/common/Input';
 import Dropdown from '@components/common/Dropdown';
 import { colors, spacing, typography } from '@constants/theme';
+
+type EditItemRouteProp = RouteProp<ProfileStackParamList, 'EditItem'>;
+type EditItemNavigationProp = StackNavigationProp<ProfileStackParamList, 'EditItem'>;
 
 interface PhotoSlot {
   id: string;
   uri?: string;
 }
 
-export default function CreateListingScreen() {
-  const navigation = useNavigation();
+export default function EditItemScreen() {
+  const route = useRoute<EditItemRouteProp>();
+  const navigation = useNavigation<EditItemNavigationProp>();
+  const { listingId } = route.params;
 
-  // form state
-  const [photos, setPhotos] = useState<PhotoSlot[]>([
-    { id: '1' },
-    { id: '2' },
-    { id: '3' },
-    { id: '4' },
-  ]);
-  const [title, setTitle] = useState('');
-  const [price, setPrice] = useState('');
-  const [description, setDescription] = useState('');
-  const [closet, setCloset] = useState('');
-  const [isPrivate, setIsPrivate] = useState(false);
+  // find the listing to edit
+  const listing = mockListings.find(l => l.id === listingId);
+
+  if (!listing) {
+    return (
+      <View style={styles.container}>
+        <Text>listing not found</Text>
+      </View>
+    );
+  }
+
+  // form state (initialized with existing listing data)
+  const [photos, setPhotos] = useState<PhotoSlot[]>(
+    listing.photos.map((uri, index) => ({ id: String(index + 1), uri }))
+  );
+  const [title, setTitle] = useState(listing.title);
+  const [price, setPrice] = useState(String(listing.price));
+  const [description, setDescription] = useState(listing.description);
+  const [closet, setCloset] = useState(listing.closet);
+  const [isPrivate, setIsPrivate] = useState(listing.visibility === 'friends');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // closet options for dropdown
@@ -53,7 +69,6 @@ export default function CreateListingScreen() {
   const DESCRIPTION_WORD_LIMIT = 50;
 
   const handleAddPhoto = (slotId: string) => {
-    // placeholder for image picker - in real implementation, use expo-image-picker
     Alert.alert(
       'can upload picture!',
       'this will use the apple ui to take a photo or choose from camera roll',
@@ -67,8 +82,6 @@ export default function CreateListingScreen() {
   };
 
   const mockAddPhoto = (slotId: string) => {
-    // mock photo URL for demonstration
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const timestamp = Date.now();
     const mockPhotoUrl = `https://picsum.photos/800/1000?random=${timestamp}`;
     setPhotos(prevPhotos =>
@@ -100,9 +113,7 @@ export default function CreateListingScreen() {
   };
 
   const handlePriceChange = (text: string) => {
-    // remove non-numeric characters except decimal point
     const cleaned = text.replace(/[^0-9.]/g, '');
-    // ensure only one decimal point
     const parts = cleaned.split('.');
     if (parts.length > 2) {
       setPrice(parts[0] + '.' + parts.slice(1).join(''));
@@ -111,70 +122,14 @@ export default function CreateListingScreen() {
     }
   };
 
-  const formatPriceDisplay = (value: string): string => {
-    if (!value) return '';
-    const num = parseFloat(value);
-    if (isNaN(num)) return value;
-    return `$${num.toFixed(2)}`;
-  };
-
   const getWordCount = (text: string): number => {
     return text.trim().split(/\s+/).filter(word => word.length > 0).length;
   };
 
-  const validateForm = (): boolean => {
-    const newErrors: { [key: string]: string } = {};
-
-    // check if at least one photo
-    const hasPhoto = photos.some(photo => photo.uri);
-    if (!hasPhoto) {
-      newErrors.photos = 'at least one photo is required';
-    }
-
-    // check title (max 50 characters)
-    if (!title.trim()) {
-      newErrors.title = 'item name is required';
-    } else if (title.trim().length < 3) {
-      newErrors.title = 'item name must be at least 3 characters';
-    } else if (title.length > TITLE_LIMIT) {
-      newErrors.title = `item name must be ${TITLE_LIMIT} characters or less`;
-    }
-
-    // check price (must be valid number)
-    if (!price.trim()) {
-      newErrors.price = 'price is required';
-    } else if (isNaN(Number(price)) || Number(price) <= 0) {
-      newErrors.price = 'price must be a positive number';
-    }
-
-    // check description (max 50 words)
-    const wordCount = getWordCount(description);
-    if (!description.trim()) {
-      newErrors.description = 'description is required';
-    } else if (wordCount < 3) {
-      newErrors.description = 'description must be at least 3 words';
-    } else if (wordCount > DESCRIPTION_WORD_LIMIT) {
-      newErrors.description = `description must be ${DESCRIPTION_WORD_LIMIT} words or less`;
-    }
-
-    // check closet
-    if (!closet.trim()) {
-      newErrors.closet = 'closet is required';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleCreate = () => {
-    if (!validateForm()) {
-      return;
-    }
-
-    // mock listing creation
+  const handleSave = () => {
     Alert.alert(
       'success',
-      'listing created! (mock)',
+      'listing updated! (mock)',
       [
         {
           text: 'ok',
@@ -184,7 +139,24 @@ export default function CreateListingScreen() {
     );
   };
 
-  // count how many photos have been added
+  const handleDelete = () => {
+    Alert.alert(
+      'delete listing',
+      'are you sure you want to delete this listing? this cannot be undone.',
+      [
+        { text: 'cancel', style: 'cancel' },
+        {
+          text: 'delete',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert('deleted', 'listing deleted (mock)');
+            navigation.goBack();
+          },
+        },
+      ]
+    );
+  };
+
   const photoCount = photos.filter(photo => photo.uri).length;
 
   return (
@@ -199,10 +171,7 @@ export default function CreateListingScreen() {
       >
         {/* photo picker */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            add photos ({photoCount}/4)
-            {errors.photos && <Text style={styles.errorInline}> - {errors.photos}</Text>}
-          </Text>
+          <Text style={styles.sectionTitle}>photos ({photoCount}/4)</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -279,7 +248,7 @@ export default function CreateListingScreen() {
           <Input
             value={description}
             onChangeText={handleDescriptionChange}
-            placeholder="example: gray tommy hilfiger t-shirt, large, worn maybe 10 times? sort of long."
+            placeholder="add description..."
             multiline
             numberOfLines={4}
             error={errors.description}
@@ -306,7 +275,7 @@ export default function CreateListingScreen() {
 
         {/* visibility toggle */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>why are you selling this?</Text>
+          <Text style={styles.sectionTitle}>privacy</Text>
           <View style={styles.toggleRow}>
             <Text style={styles.toggleLabel}>make this a private listing</Text>
             <Switch
@@ -319,12 +288,17 @@ export default function CreateListingScreen() {
           </View>
         </View>
 
-        {/* create button */}
+        {/* save button */}
         <Button
-          title="add listing"
-          onPress={handleCreate}
-          style={styles.createButton}
+          title="save changes"
+          onPress={handleSave}
+          style={styles.saveButton}
         />
+
+        {/* delete button */}
+        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+          <Text style={styles.deleteButtonText}>delete listing</Text>
+        </TouchableOpacity>
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
@@ -353,11 +327,6 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: spacing.sm,
-  },
-  errorInline: {
-    color: colors.error,
-    textTransform: 'none',
-    fontSize: typography.fontSize.xs,
   },
   photoRow: {
     marginHorizontal: -spacing.lg,
@@ -411,14 +380,13 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.border,
     borderStyle: 'dashed',
-    backgroundColor: colors.backgroundSecondary,
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
   },
   photoPlaceholderFirst: {
     borderColor: colors.textSecondary,
     borderWidth: 3,
-    backgroundColor: colors.backgroundSecondary + '99',
   },
   photoPlaceholderIcon: {
     fontSize: 32,
@@ -440,11 +408,6 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.textTertiary,
   },
-  hint: {
-    fontSize: typography.fontSize.sm,
-    color: colors.textTertiary,
-    marginTop: spacing.xs,
-  },
   toggleRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -456,8 +419,18 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.medium,
     color: colors.text,
   },
-  createButton: {
+  saveButton: {
     marginTop: spacing.md,
+  },
+  deleteButton: {
+    marginTop: spacing.lg,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+  },
+  deleteButtonText: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.error,
   },
   bottomSpacer: {
     height: spacing.xl,

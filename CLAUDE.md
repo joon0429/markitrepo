@@ -1,7 +1,7 @@
 # CLAUDE.md - project context & design system
 
 > this file is automatically read by claude code at the start of every conversation.
-> last updated: 2026-02-03
+> last updated: 2026-02-07 (evening session)
 
 ---
 
@@ -25,8 +25,6 @@
 
 ### quick commands
 
-- `"save this to claude.md"` - add current decision/pattern to this document
-- `"what does claude.md say about [topic]?"` - query specific guidance
 - `"review claude.md"` - get a summary of current principles/constraints
 
 ---
@@ -44,16 +42,24 @@
 
 ### interaction patterns
 
-- **navigation:** bottom tabs for main sections (Feed, Create, Messages, Friends, Profile)
+- **navigation:** bottom tabs (5 slots): home, notifs, create (modal trigger), map, profile
+- **modal flows:** "temporary flow" pattern - create listing slides up from bottom as modal, maintains page position when dismissed
 - **feed browsing:** tabbed interface (friends vs friends+), pull-to-refresh, infinite scroll
-- **photo viewing:** swipeable carousel with dot indicators
+- **photo viewing:** swipeable carousel with dot indicators (instagram-style)
+- **photo upload:** horizontal row of 4 image slots, first slot has darker border to indicate primary
 - **"mark.it" action:** soft reservation system - seller sees who marked
 - **messaging:** real-time chat tied to specific listings with listing context card
 - **touch targets:** platform-native sizing (iOS HIG / Material Design standards)
-- **instagram-style UX:** profile with stats and boards grid, friends list with search, DM-style conversations
+- **pinterest-style profile:** horizontal stats row (items/followers/following), search bar, filter tags, boards grid (2 columns)
+- **instagram-style UX:** friends list with search, DM-style conversations
+- **dropdown selectors:** modal overlay with option list for structured inputs (boards/closets)
 - **search:** instant filtering (no debounce) for small datasets like friends list
 - **unread indicators:** blue dot + bold text for unread conversations/messages
 - **message bubbles:** blue background (right-aligned) for own messages, gray background (left-aligned) for others
+- **board management:** profile → board detail → edit item (simplified flow, no multi-select)
+- **listing detail layout:** share button (top right), simplified seller info, mark count badge, bottom action buttons (mark it + send message)
+- **messages access:** envelope icon in feed header navigates to conversations
+- **toggle switches:** privacy settings use native switch component instead of button groups
 
 ### visual design
 
@@ -62,6 +68,7 @@
 - **color system:** platform defaults with customization via react-native-paper theming
 - **spacing system:** consistent padding/margins using theme constants
 - **images:** photo carousels for listings (1-4 photos), compressed thumbnails in feed
+- **placeholder images:** triangle icon (▲) on gray background for missing/unloaded images
 
 ### feedback & affordances
 
@@ -91,6 +98,18 @@
 | navigation types | serializable versions for complex objects | React Navigation can't handle Timestamp objects in params; create serializable versions with ISO strings | 2026-02-03 |
 | component organization | feature folders (profile/, friends/, messages/) | keeps related components grouped; easier to find and maintain than flat structure | 2026-02-03 |
 | instagram patterns | Material Top Tabs + list patterns | consistent with user expectations; tabs for friends/requests, listings/boards, etc. | 2026-02-03 |
+| create listing UI | modal presentation at root level | "temporary flow" pattern - slides up from bottom, maintains page position; not in tab navigator | 2026-02-06 |
+| form input limits | title: 50 chars, description: 50 words | prevents excessive input, enforced during typing with live counters | 2026-02-06 |
+| placeholder images | PlaceholderImage component with triangle icon | all external image URLs replaced with 'placeholder' string; consistent fallback UI | 2026-02-06 |
+| tab navigation structure | 5 slots: home, notifs, create, map, profile | removed signup flow; simplified auth to email/password only; no regex validation | 2026-02-07 |
+| authentication flow | single login screen, no signup | simplified for MVP; email/password only, basic empty check validation | 2026-02-07 |
+| profile layout | pinterest saved ideas pattern | horizontal stats, search bar, filter tags, boards grid; removed material tabs | 2026-02-07 |
+| board/closet selection | dropdown component with preset options | unified "board" terminology; predefined options: unnamed, clothes, shoes, furniture + "add more..." | 2026-02-07 |
+| listing organization | closet field (board name) + optional category field | closet = board name (user-facing), category = optional tag for filtering | 2026-02-07 |
+| messages navigation | added to FeedStack (Conversations + Chat screens) | messages accessible from feed header button; maintains context within main navigation flow | 2026-02-07 |
+| board management flow | profile → board detail → edit item (no multi-select) | simplified from pinterest pattern; removed organize/edit board multi-select for MVP simplicity | 2026-02-07 |
+| listing detail actions | bottom action bar with mark it + send message | two primary CTAs side by side; mark button changes style when active; share in header | 2026-02-07 |
+| privacy toggle | Switch component instead of button group | cleaner UI for binary choice; consistent with native patterns | 2026-02-07 |
 
 ### code conventions
 
@@ -110,11 +129,11 @@
 |-------|-----------------|------------------|------|
 | scope creep during planning | initial feature discussions could expand infinitely | explicitly define MVP vs post-MVP features; skip analytics, QR codes, search, reputation system for v1 | 2026-02-01 |
 | emojis in documentation | used emojis in summaries and documentation | NEVER use emojis or emoticons anywhere in the project | 2026-02-01 |
-| improper text casing | capitalized regular text unnecessarily | keep regular text lowercase; use ALL CAPS or all lowercase for emphasis; exempt code/file names | 2026-02-01 |
 | navigation params with Timestamp | passed Timestamp objects in navigation params causing serialization errors | create serializable versions (SerializableConversation, SerializableMessage) with ISO string dates + helper functions | 2026-02-03 |
 | keyboard overlap in chat | keyboard covered message input without KeyboardAvoidingView | use KeyboardAvoidingView with platform-specific behavior (iOS: padding, Android: undefined) and offset | 2026-02-03 |
 | avatar spam in messages | showing avatar on every message from same sender | group consecutive messages; only show avatar on first message from each sender | 2026-02-03 |
 | image defaultSource with @assets | used defaultSource={require('@assets/icon.png')} causing bundler errors | remove defaultSource prop; rely on backgroundColor in styles as image fallback | 2026-02-03 |
+| external image URLs in mock data | used unsplash/pravatar URLs causing slow loads and external dependencies | replace all with 'placeholder' string; use PlaceholderImage component for consistent fallback | 2026-02-06 |
 
 ---
 
@@ -206,3 +225,35 @@
 - created comprehensive mock data: profiles (boards + stats), friends (7 friends + 3 requests), messages (4 conversations)
 - updated navigation: added ChatScreen to MessagesStack with proper types
 - all screens now instagram-style with Material Top Tabs, pull-to-refresh, empty states
+
+### 2026-02-06 - modal flows, placeholder system, navigation restructure
+- refactored CreateListingScreen to modal presentation (slides up from bottom, maintains page position)
+- updated create listing UI: horizontal row for images (4 slots), first slot with darker border
+- added form input limits: 50 char title, 50 word description with live counters
+- created PlaceholderImage component (triangle icon on gray background)
+- replaced all external image URLs (unsplash, pravatar) with 'placeholder' in mock data
+- updated PhotoCarousel to handle placeholder images with fallback UI
+- restructured bottom navigation: 5 tabs (home, notifications placeholder, create modal trigger, hidden slot, profile)
+- removed Messages and Friends from bottom tabs (kept as screens for future navigation)
+- added navigation handlers in ListingDetailScreen (clickable seller profile, send message alerts)
+- confirmed dot indicators working for multi-image listings
+
+### 2026-02-07 (morning) - auth simplification, navigation finalization, profile redesign
+- **auth flow:** removed SignupScreen and all signup functionality; simplified login to basic email/password (no regex validation)
+- **navigation:** finalized 5 tabs: home, notifs, create, map, profile
+- **notifications screen:** created with placeholder framework (tag filters, messages button, empty state)
+- **map screen:** created placeholder for future map functionality
+- **profile screen:** redesigned to pinterest saved ideas pattern (removed material tabs, added search + filter tags + boards grid)
+- **profile header:** horizontal layout with stats row (items, followers, following), username + bio, edit button
+- **board/closet system:** created Dropdown component for structured selection; unified terminology around "boards"
+- **listing types:** added optional category field for additional filtering/organization
+- **mock data organization:** all 20 listings assigned to 4 boards (unnamed: 9, clothes: 7, shoes: 2, furniture: 2) with category tags
+
+### 2026-02-07 (evening) - listing detail updates, board management, navigation cleanup
+- **listing detail screen:** updated to match frame - share button in header, simplified seller info (no card), mark count badge, bottom action buttons (mark it + send message side by side)
+- **create listing privacy:** replaced visibility button group with toggle switch ("make this a private listing")
+- **messages navigation:** added Conversations and Chat screens to FeedStack; envelope icon button in feed header navigates to messages
+- **board management implementation:** created BoardDetailScreen (shows items in board) and EditItemScreen (edit/delete individual listings)
+- **simplified board flow:** removed EditBoard multi-select functionality; direct flow is profile → board detail → edit item
+- **navigation cleanup:** removed unused createSimpleStack helper, properly structured all stack navigators
+- **updated navigation graph:** documented complete vertex/edge structure for all screens and navigation flows
