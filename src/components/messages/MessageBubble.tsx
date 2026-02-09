@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 4,
   },
   otherBubble: {
-    backgroundColor: colors.divider,
+    backgroundColor: colors.surface,
     borderBottomLeftRadius: 4,
     marginLeft: spacing.xs,
   },
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     lineHeight: typography.fontSize.md * 1.4,
   },
   ownText: {
-    color: colors.background,
+    color: '#FFFFFF',
   },
   otherText: {
     color: colors.text,

@@ -41,13 +41,13 @@ function FriendsTab() {
       {filteredFriends.length === 0 ? (
         searchQuery ? (
           <EmptyState
-            icon="🔍"
+            icon="search-outline"
             title="no results"
             description={`no friends found matching "${searchQuery}"`}
           />
         ) : (
           <EmptyState
-            icon="👋"
+            icon="people-outline"
             title="no friends yet"
             description="add friends to see them here"
           />
@@ -63,7 +63,7 @@ function FriendsTab() {
               onMessage={() => handleMessage(item.uid)}
             />
           )}
-          showsVerticalScrollIndicator={false}
+          showsVerticalScrollIndicator={true}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -103,7 +103,7 @@ function RequestsTab() {
     return (
       <View style={styles.container}>
         <EmptyState
-          icon="✅"
+          icon="checkmark-circle-outline"
           title="no pending requests"
           description="you're all caught up"
         />
@@ -123,7 +123,7 @@ function RequestsTab() {
             onDecline={() => handleDecline(item.id)}
           />
         )}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

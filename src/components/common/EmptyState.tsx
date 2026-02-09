@@ -1,10 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import Button from './Button';
 import { colors, spacing, typography } from '@constants/theme';
 
 interface EmptyStateProps {
-  icon: string;
+  icon: string; // Ionicons name
   title: string;
   description?: string;
   actionLabel?: string;
@@ -14,7 +16,7 @@ interface EmptyStateProps {
 export default function EmptyState({ icon, title, description, actionLabel, onAction }: EmptyStateProps) {
   return (
     <View style={styles.container}>
-      <Text style={styles.icon}>{icon}</Text>
+      <Ionicons name={icon as any} size={64} color={colors.textTertiary} style={styles.icon} />
       <Text style={styles.title}>{title}</Text>
       {description && <Text style={styles.description}>{description}</Text>}
       {actionLabel && onAction && (
@@ -22,7 +24,6 @@ export default function EmptyState({ icon, title, description, actionLabel, onAc
           title={actionLabel}
           onPress={onAction}
           variant="primary"
-          style={styles.button}
         />
       )}
     </View>
@@ -37,7 +38,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
   },
   icon: {
-    fontSize: 64,
     marginBottom: spacing.md,
   },
   title: {
@@ -52,8 +52,5 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: spacing.lg,
-  },
-  button: {
-    marginTop: spacing.md,
   },
 });

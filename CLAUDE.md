@@ -1,7 +1,7 @@
 # CLAUDE.md - project context & design system
 
 > this file is automatically read by claude code at the start of every conversation.
-> last updated: 2026-02-07 (evening session)
+> last updated: 2026-02-09
 
 ---
 
@@ -54,8 +54,9 @@
 - **instagram-style UX:** friends list with search, DM-style conversations
 - **dropdown selectors:** modal overlay with option list for structured inputs (boards/closets)
 - **search:** instant filtering (no debounce) for small datasets like friends list
-- **unread indicators:** blue dot + bold text for unread conversations/messages
-- **message bubbles:** blue background (right-aligned) for own messages, gray background (left-aligned) for others
+- **unread indicators:** primary-colored dot + bold text for unread conversations/messages
+- **headers:** all screen headers managed via navigator config (not custom in-screen headers); dark background with white text
+- **message bubbles:** primary color background (right-aligned) for own messages, surface color background (left-aligned) for others
 - **board management:** profile → board detail → edit item (simplified flow, no multi-select)
 - **listing detail layout:** share button (top right), simplified seller info, mark count badge, bottom action buttons (mark it + send message)
 - **messages access:** envelope icon in feed header navigates to conversations
@@ -64,11 +65,15 @@
 ### visual design
 
 - **design system:** platform-native UI (react-native-paper with iOS overrides)
+- **theme mode:** dark mode (background: #121212, surface: #1E1E1E, primary: #BB86FC, text: #FFFFFF)
 - **typography:** system fonts (San Francisco on iOS, Roboto on Android)
-- **color system:** platform defaults with customization via react-native-paper theming
+- **color system:** dark mode palette via react-native-paper MD3DarkTheme + custom navigation theme
 - **spacing system:** consistent padding/margins using theme constants
 - **images:** photo carousels for listings (1-4 photos), compressed thumbnails in feed
-- **placeholder images:** triangle icon (▲) on gray background for missing/unloaded images
+- **placeholder images:** triangle icon on dark surface background for missing/unloaded images
+- **icons:** Ionicons from @expo/vector-icons for all UI icons (NEVER use emoji as icons)
+- **scrollbars:** vertical scroll indicators always visible (showsVerticalScrollIndicator={true})
+- **text on primary buttons:** always use '#FFFFFF' (not colors.background, which is dark)
 
 ### feedback & affordances
 
@@ -110,6 +115,10 @@
 | board management flow | profile → board detail → edit item (no multi-select) | simplified from pinterest pattern; removed organize/edit board multi-select for MVP simplicity | 2026-02-07 |
 | listing detail actions | bottom action bar with mark it + send message | two primary CTAs side by side; mark button changes style when active; share in header | 2026-02-07 |
 | privacy toggle | Switch component instead of button group | cleaner UI for binary choice; consistent with native patterns | 2026-02-07 |
+| dark mode | MD3DarkTheme + custom navigation DarkTheme | dark bg (#121212), surface (#1E1E1E), primary (#BB86FC); PaperProvider wraps app; StatusBar light-content | 2026-02-09 |
+| header management | all headers via navigator screenOptions | removed custom in-screen headers from NotificationsScreen and MapScreen; defaultScreenOptions object shared across stacks | 2026-02-09 |
+| icon system | Ionicons from @expo/vector-icons | replaced all emoji icons (search, bookmark, share, send, empty states) with Ionicons; EmptyState component accepts Ionicons name string | 2026-02-09 |
+| scrollbar visibility | showsVerticalScrollIndicator={true} everywhere | visible scrollbars on all vertical ScrollViews and FlatLists for better UX affordance | 2026-02-09 |
 
 ### code conventions
 
@@ -134,6 +143,10 @@
 | avatar spam in messages | showing avatar on every message from same sender | group consecutive messages; only show avatar on first message from each sender | 2026-02-03 |
 | image defaultSource with @assets | used defaultSource={require('@assets/icon.png')} causing bundler errors | remove defaultSource prop; rely on backgroundColor in styles as image fallback | 2026-02-03 |
 | external image URLs in mock data | used unsplash/pravatar URLs causing slow loads and external dependencies | replace all with 'placeholder' string; use PlaceholderImage component for consistent fallback | 2026-02-06 |
+| colors.background for text on buttons | after dark mode, colors.background became #121212 (dark), making text invisible on primary buttons | use '#FFFFFF' hardcoded for text that sits on primary-colored backgrounds, not colors.background | 2026-02-09 |
+| emoji icons in components | used emoji characters as UI icons (search, bookmark, etc.) violating no-emoji rule | use Ionicons from @expo/vector-icons for all icons; EmptyState accepts Ionicons name strings | 2026-02-09 |
+| undefined color references | CreateListingScreen used colors.backgroundSecondary which didn't exist in theme | always reference colors defined in theme.ts; use colors.surface for elevated input backgrounds | 2026-02-09 |
+| custom headers vs navigator headers | NotificationsScreen and MapScreen had custom in-screen headers causing inconsistency | always configure headers via navigator screenOptions; share defaultScreenOptions across stacks | 2026-02-09 |
 
 ---
 

@@ -36,11 +36,11 @@ const styles = StyleSheet.create({
     flex: 1,
     margin: spacing.xs,
     borderRadius: borderRadius.lg,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 3,
   },
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   },
   infoSection: {
     padding: spacing.sm,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
   },
   boardName: {
     fontSize: typography.fontSize.sm,

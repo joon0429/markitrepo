@@ -29,7 +29,7 @@ export default function ProfileListingsGrid({ userId, onRefresh, refreshing }: P
   if (userListings.length === 0) {
     return (
       <EmptyState
-        icon="📦"
+        icon="cube-outline"
         title="no listings yet"
         description="this user hasn't posted any items"
       />
@@ -48,7 +48,7 @@ export default function ProfileListingsGrid({ userId, onRefresh, refreshing }: P
         />
       )}
       contentContainerStyle={styles.listContent}
-      showsVerticalScrollIndicator={false}
+      showsVerticalScrollIndicator={true}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}

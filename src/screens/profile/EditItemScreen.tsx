@@ -167,7 +167,7 @@ export default function EditItemScreen() {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
       >
         {/* photo picker */}
         <View style={styles.section}>
@@ -282,7 +282,7 @@ export default function EditItemScreen() {
               value={isPrivate}
               onValueChange={setIsPrivate}
               trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={colors.background}
+              thumbColor={'#FFFFFF'}
               ios_backgroundColor={colors.border}
             />
           </View>
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   removeButtonText: {
-    color: colors.background,
+    color: '#FFFFFF',
     fontSize: 20,
     lineHeight: 20,
     fontWeight: typography.fontWeight.bold,

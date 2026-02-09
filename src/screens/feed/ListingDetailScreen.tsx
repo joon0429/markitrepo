@@ -4,6 +4,7 @@ import { useRoute, RouteProp, useNavigation, CompositeNavigationProp } from '@re
 import { StackNavigationProp } from '@react-navigation/stack';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { FeedStackParamList, MainTabParamList } from '@navigation/types';
+import { Ionicons } from '@expo/vector-icons';
 import PhotoCarousel from '@components/listings/PhotoCarousel';
 import Avatar from '@components/common/Avatar';
 import { colors, spacing, typography } from '@constants/theme';
@@ -88,7 +89,7 @@ export default function ListingDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={true}>
         {/* photo carousel */}
         <PhotoCarousel photos={listing.photos} onDoubleTap={handleDoubleTap} />
 
@@ -97,7 +98,7 @@ export default function ListingDetailScreen() {
           <View style={styles.titleRow}>
             <Text style={styles.title}>{listing.title}</Text>
             <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
-              <Text style={styles.shareIcon}>↗</Text>
+              <Ionicons name="share-outline" size={22} color={colors.text} />
             </TouchableOpacity>
           </View>
 
@@ -114,7 +115,7 @@ export default function ListingDetailScreen() {
           {/* marked by count */}
           {markCount > 0 && (
             <View style={styles.markCount}>
-              <Text style={styles.markIcon}>🔖</Text>
+              <Ionicons name="bookmark" size={18} color={colors.primary} />
               <Text style={styles.markText}>
                 {markCount} {markCount === 1 ? 'person' : 'people'} marked it!
               </Text>
@@ -135,7 +136,7 @@ export default function ListingDetailScreen() {
           onPress={handleMark}
           activeOpacity={0.8}
         >
-          <Text style={styles.markButtonIcon}>{isMarked ? '🔖' : '🔖'}</Text>
+          <Ionicons name={isMarked ? 'bookmark' : 'bookmark-outline'} size={18} color={isMarked ? colors.text : '#FFFFFF'} />
           <Text style={[styles.markButtonText, isMarked && styles.markButtonTextActive]}>
             {isMarked ? 'marked' : 'mark it'}
           </Text>
@@ -147,7 +148,7 @@ export default function ListingDetailScreen() {
           activeOpacity={0.8}
         >
           <Text style={styles.messageButtonText}>send message</Text>
-          <Text style={styles.messageButtonIcon}>✈</Text>
+          <Ionicons name="send-outline" size={16} color={colors.text} />
         </TouchableOpacity>
       </View>
     </View>
@@ -178,10 +179,6 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
     marginLeft: spacing.md,
   },
-  shareIcon: {
-    fontSize: typography.fontSize.xl,
-    color: colors.text,
-  },
   seller: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -198,9 +195,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.md,
     gap: spacing.xs,
-  },
-  markIcon: {
-    fontSize: typography.fontSize.md,
   },
   markText: {
     fontSize: typography.fontSize.md,
@@ -230,7 +224,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: spacing.md,
     borderRadius: 8,
-    backgroundColor: colors.text,
+    backgroundColor: colors.primary,
     gap: spacing.xs,
   },
   markButtonActive: {
@@ -238,13 +232,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  markButtonIcon: {
-    fontSize: typography.fontSize.md,
-  },
   markButtonText: {
     fontSize: typography.fontSize.md,
     fontWeight: typography.fontWeight.semibold,
-    color: colors.background,
+    color: '#FFFFFF',
   },
   markButtonTextActive: {
     color: colors.text,
@@ -257,17 +248,13 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: colors.text,
-    backgroundColor: colors.background,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
     gap: spacing.xs,
   },
   messageButtonText: {
     fontSize: typography.fontSize.md,
     fontWeight: typography.fontWeight.semibold,
-    color: colors.text,
-  },
-  messageButtonIcon: {
-    fontSize: typography.fontSize.md,
     color: colors.text,
   },
 });

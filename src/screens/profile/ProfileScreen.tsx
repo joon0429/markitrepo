@@ -67,7 +67,7 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={true}>
         {/* profile header */}
         <ProfileHeader
           user={currentUser}
@@ -115,7 +115,7 @@ export default function ProfileScreen() {
             />
           )}
           contentContainerStyle={styles.boardsListContent}
-          showsVerticalScrollIndicator={false}
+          showsVerticalScrollIndicator={true}
           scrollEnabled={false}
         />
       </ScrollView>
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   activeTag: {
-    backgroundColor: colors.text,
+    backgroundColor: colors.primary,
   },
   tagText: {
     fontSize: typography.fontSize.sm,
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   activeTagText: {
-    color: colors.background,
+    color: '#FFFFFF',
   },
   boardsListContent: {
     paddingHorizontal: spacing.xs,

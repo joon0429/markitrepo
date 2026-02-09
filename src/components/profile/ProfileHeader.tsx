@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
   editButton: {
     width: '100%',
     paddingVertical: spacing.sm,
-    backgroundColor: colors.divider,
+    backgroundColor: colors.surface,
     borderRadius: borderRadius.md,
     alignItems: 'center',
   },
@@ -125,6 +125,6 @@ const styles = StyleSheet.create({
   addFriendText: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.semibold,
-    color: colors.background,
+    color: '#FFFFFF',
   },
 });

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, borderRadius, typography } from '@constants/theme';
 
 interface SearchBarProps {
@@ -15,7 +16,7 @@ export default function SearchBar({ value, onChangeText, placeholder = 'search' 
 
   return (
     <View style={styles.container}>
-      <Text style={styles.icon}>🔍</Text>
+      <Ionicons name="search-outline" size={18} color={colors.textSecondary} style={styles.icon} />
       <TextInput
         style={styles.input}
         value={value}
@@ -27,7 +28,7 @@ export default function SearchBar({ value, onChangeText, placeholder = 'search' 
       />
       {value.length > 0 && (
         <TouchableOpacity onPress={handleClear} style={styles.clearButton} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Text style={styles.clearText}>✕</Text>
+          <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
         </TouchableOpacity>
       )}
     </View>
@@ -38,7 +39,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.divider,
+    backgroundColor: colors.surface,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
@@ -46,9 +47,7 @@ const styles = StyleSheet.create({
     marginVertical: spacing.sm,
   },
   icon: {
-    fontSize: typography.fontSize.md,
     marginRight: spacing.sm,
-    color: colors.textSecondary,
   },
   input: {
     flex: 1,
@@ -58,9 +57,5 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     padding: spacing.xs,
-  },
-  clearText: {
-    fontSize: typography.fontSize.md,
-    color: colors.textSecondary,
   },
 });

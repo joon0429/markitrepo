@@ -36,7 +36,7 @@ export default function ConversationsScreen() {
     return (
       <View style={styles.container}>
         <EmptyState
-          icon="💬"
+          icon="chatbubbles-outline"
           title="no messages yet"
           description="start a conversation by marking a listing"
         />
@@ -56,7 +56,7 @@ export default function ConversationsScreen() {
             onPress={() => handleConversationPress(item)}
           />
         )}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

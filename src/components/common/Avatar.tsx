@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   initial: {
-    color: colors.background,
+    color: '#FFFFFF',
     fontWeight: typography.fontWeight.semibold,
   },
 });

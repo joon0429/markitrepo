@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     maxHeight: 100,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    backgroundColor: colors.divider,
+    backgroundColor: colors.surface,
     borderRadius: borderRadius.lg,
     fontSize: typography.fontSize.md,
     color: colors.text,
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   sendButtonText: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.semibold,
-    color: colors.background,
+    color: '#FFFFFF',
   },
   sendButtonTextDisabled: {
     color: colors.textTertiary,

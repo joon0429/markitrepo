@@ -28,28 +28,8 @@ export type MainTabParamList = {
 export type FeedStackParamList = {
   Feed: undefined;
   ListingDetail: { listing: SerializableListing };
-  UserProfile: { userId: string };
   Conversations: undefined;
   Chat: { conversationId: string; conversation: SerializableConversation };
-};
-
-// create stack
-export type CreateStackParamList = {
-  CreateListing: undefined;
-  EditListing: { listingId: string };
-};
-
-// messages stack
-export type MessagesStackParamList = {
-  Conversations: undefined;
-  Chat: { conversationId: string; conversation: SerializableConversation };
-};
-
-// friends stack
-export type FriendsStackParamList = {
-  Friends: undefined;
-  FriendRequests: undefined;
-  AddFriend: undefined;
 };
 
 // notifications stack
@@ -67,9 +47,6 @@ export type MapStackParamList = {
 // profile stack
 export type ProfileStackParamList = {
   Profile: undefined;
-  EditProfile: undefined;
-  MyListings: undefined;
-  Settings: undefined;
   BoardDetail: { boardName: string };
   EditItem: { listingId: string };
 };

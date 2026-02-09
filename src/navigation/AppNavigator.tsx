@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useAuth } from '@contexts/AuthContext';
 import AuthNavigator from './AuthNavigator';
@@ -7,8 +7,22 @@ import MainNavigator from './MainNavigator';
 import CreateListingScreen from '@screens/listings/CreateListingScreen';
 import LoadingSpinner from '@components/common/LoadingSpinner';
 import { RootStackParamList } from './types';
+import { colors, typography } from '@constants/theme';
 
 const Stack = createStackNavigator<RootStackParamList>();
+
+const navigationTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    primary: colors.primary,
+    background: colors.background,
+    card: colors.background,
+    text: colors.text,
+    border: colors.border,
+    notification: colors.primary,
+  },
+};
 
 export default function AppNavigator() {
   const { user, loading } = useAuth();
@@ -18,7 +32,7 @@ export default function AppNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={navigationTheme}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
           <>
@@ -31,6 +45,12 @@ export default function AppNavigator() {
                 headerShown: true,
                 headerTitle: 'sell an item',
                 headerBackTitle: 'cancel',
+                headerStyle: { backgroundColor: colors.background },
+                headerTintColor: colors.text,
+                headerTitleStyle: {
+                  color: colors.text,
+                  fontWeight: typography.fontWeight.semibold,
+                },
               }}
             />
           </>

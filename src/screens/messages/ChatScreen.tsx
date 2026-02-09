@@ -104,7 +104,7 @@ export default function ChatScreen() {
           data={messages}
           keyExtractor={(item) => item.id}
           renderItem={renderMessage}
-          showsVerticalScrollIndicator={false}
+          showsVerticalScrollIndicator={true}
           onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
           ListHeaderComponent={
             <ListingContextCard

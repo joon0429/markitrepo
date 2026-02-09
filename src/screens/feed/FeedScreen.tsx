@@ -3,18 +3,13 @@ import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { Listing, SerializableListing, serializeListing } from '@types';
+import { Listing, serializeListing } from '@types';
+import { FeedStackParamList } from '@navigation/types';
 import { mockListings } from '@services/mock/listings';
 import ListingCard from '@components/listings/ListingCard';
 import { colors, spacing, typography } from '@constants/theme';
 
 const Tab = createMaterialTopTabNavigator();
-
-type FeedStackParamList = {
-  Feed: undefined;
-  ListingDetail: { listing: SerializableListing };
-  UserProfile: { userId: string };
-};
 
 type FeedNavigationProp = StackNavigationProp<FeedStackParamList, 'Feed'>;
 
@@ -49,7 +44,7 @@ function FeedList({ visibility }: { visibility: 'friends' | 'friends_plus' }) {
           />
         )}
         contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -76,7 +71,7 @@ export default function FeedScreen() {
       screenOptions={{
         tabBarActiveTintColor: colors.text,
         tabBarInactiveTintColor: colors.textTertiary,
-        tabBarIndicatorStyle: { backgroundColor: 'transparent' },
+        tabBarIndicatorStyle: { backgroundColor: colors.primary },
         tabBarStyle: {
           backgroundColor: colors.background,
           elevation: 0,

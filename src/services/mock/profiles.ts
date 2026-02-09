@@ -1,5 +1,4 @@
 import { Board, UserStats } from '@types/profile';
-import { mockListings } from './listings';
 
 // mock boards for users
 export const mockBoards: Board[] = [

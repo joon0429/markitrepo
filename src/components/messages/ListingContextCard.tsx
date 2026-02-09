@@ -27,7 +27,7 @@ export default function ListingContextCard({ title, photoURL, onPress }: Listing
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: colors.divider,
+    backgroundColor: colors.surface,
     marginHorizontal: spacing.md,
     marginVertical: spacing.sm,
     padding: spacing.sm,

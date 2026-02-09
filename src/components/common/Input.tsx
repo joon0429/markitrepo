@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     fontSize: typography.fontSize.md,
     color: colors.text,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
     minHeight: 48,
   },
   inputError: {

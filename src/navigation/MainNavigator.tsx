@@ -23,9 +23,18 @@ const NotificationsStack = createStackNavigator<NotificationsStackParamList>();
 const MapStack = createStackNavigator<MapStackParamList>();
 const ProfileStack = createStackNavigator<ProfileStackParamList>();
 
+const defaultScreenOptions = {
+  headerStyle: { backgroundColor: colors.background },
+  headerTintColor: colors.text,
+  headerTitleStyle: {
+    color: colors.text,
+    fontWeight: typography.fontWeight.semibold,
+  },
+};
+
 function FeedStackNavigator() {
   return (
-    <FeedStack.Navigator>
+    <FeedStack.Navigator screenOptions={defaultScreenOptions}>
       <FeedStack.Screen
         name="Feed"
         component={FeedScreen}
@@ -35,6 +44,7 @@ function FeedStackNavigator() {
           headerTitleStyle: {
             fontSize: typography.fontSize.xl,
             fontWeight: typography.fontWeight.bold,
+            color: colors.text,
           },
           headerLeft: () => <View style={headerButtonStyles.headerSpacer} />,
           headerRight: () => (
@@ -50,7 +60,7 @@ function FeedStackNavigator() {
       <FeedStack.Screen
         name="ListingDetail"
         component={ListingDetailScreen}
-        options={{ title: '' }}
+        options={{ title: 'listing' }}
       />
       <FeedStack.Screen
         name="Conversations"
@@ -68,11 +78,21 @@ function FeedStackNavigator() {
 
 function NotificationsStackNavigator() {
   return (
-    <NotificationsStack.Navigator>
+    <NotificationsStack.Navigator screenOptions={defaultScreenOptions}>
       <NotificationsStack.Screen
         name="Notifications"
         component={NotificationsScreen}
-        options={{ headerShown: false }}
+        options={({ navigation }) => ({
+          title: 'notifications',
+          headerRight: () => (
+            <TouchableOpacity
+              style={headerButtonStyles.messageButton}
+              onPress={() => navigation.navigate('Conversations')}
+            >
+              <Ionicons name="chatbubble-outline" size={22} color={colors.text} />
+            </TouchableOpacity>
+          ),
+        })}
       />
       <NotificationsStack.Screen
         name="Conversations"
@@ -90,11 +110,11 @@ function NotificationsStackNavigator() {
 
 function MapStackNavigator() {
   return (
-    <MapStack.Navigator>
+    <MapStack.Navigator screenOptions={defaultScreenOptions}>
       <MapStack.Screen
         name="Map"
         component={MapScreen}
-        options={{ headerShown: false }}
+        options={{ title: 'map' }}
       />
     </MapStack.Navigator>
   );
@@ -102,7 +122,7 @@ function MapStackNavigator() {
 
 function ProfileStackNavigator() {
   return (
-    <ProfileStack.Navigator>
+    <ProfileStack.Navigator screenOptions={defaultScreenOptions}>
       <ProfileStack.Screen
         name="Profile"
         component={ProfileScreen}
@@ -151,7 +171,12 @@ export default function MainNavigator() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarInactiveTintColor: colors.textTertiary,
+        tabBarStyle: {
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
+          borderTopWidth: 1,
+        },
       }}
     >
       <Tab.Screen

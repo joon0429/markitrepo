@@ -49,7 +49,7 @@ export default function BoardDetailScreen() {
           />
         )}
         contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

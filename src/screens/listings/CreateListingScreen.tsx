@@ -195,7 +195,7 @@ export default function CreateListingScreen() {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
       >
         {/* photo picker */}
         <View style={styles.section}>
@@ -313,7 +313,7 @@ export default function CreateListingScreen() {
               value={isPrivate}
               onValueChange={setIsPrivate}
               trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={colors.background}
+              thumbColor={'#FFFFFF'}
               ios_backgroundColor={colors.border}
             />
           </View>
@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   removeButtonText: {
-    color: colors.background,
+    color: '#FFFFFF',
     fontSize: 20,
     lineHeight: 20,
     fontWeight: typography.fontWeight.bold,
@@ -411,14 +411,14 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.border,
     borderStyle: 'dashed',
-    backgroundColor: colors.backgroundSecondary,
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
   },
   photoPlaceholderFirst: {
     borderColor: colors.textSecondary,
     borderWidth: 3,
-    backgroundColor: colors.backgroundSecondary + '99',
+    backgroundColor: colors.surface + '99',
   },
   photoPlaceholderIcon: {
     fontSize: 32,

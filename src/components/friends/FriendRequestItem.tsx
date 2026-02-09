@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   acceptButtonText: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.semibold,
-    color: colors.background,
+    color: '#FFFFFF',
   },
   declineButton: {
     paddingHorizontal: spacing.md,

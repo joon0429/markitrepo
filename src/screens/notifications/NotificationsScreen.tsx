@@ -1,13 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { NotificationsStackParamList } from '@navigation/types';
-import { Ionicons } from '@expo/vector-icons';
 import PlaceholderImage from '@components/common/PlaceholderImage';
 import { colors, spacing, typography } from '@constants/theme';
-
-type NotificationsNavigationProp = StackNavigationProp<NotificationsStackParamList, 'Notifications'>;
 
 const FILTER_TAGS = ['all', 'friend requests', 'item updates', 'mark updates'];
 
@@ -168,19 +162,10 @@ function NotificationItem({ item }: { item: Notification }) {
 }
 
 export default function NotificationsScreen() {
-  const navigation = useNavigation<NotificationsNavigationProp>();
   const [activeFilter, setActiveFilter] = useState('all');
 
   return (
     <View style={styles.container}>
-      {/* header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>notifications</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Conversations')} style={styles.messagesButton}>
-          <Ionicons name="chatbubble-outline" size={22} color={colors.text} />
-        </TouchableOpacity>
-      </View>
-
       {/* filter tags - horizontal scroll */}
       <ScrollView
         horizontal
@@ -201,7 +186,7 @@ export default function NotificationsScreen() {
       </ScrollView>
 
       {/* notification list */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={true}>
         {/* priority section */}
         <Text style={styles.sectionHeader}>priority</Text>
         {priorityNotifications.map((item) => (
@@ -231,23 +216,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xxl,
-    paddingBottom: spacing.sm,
-    backgroundColor: colors.background,
-  },
-  title: {
-    fontSize: typography.fontSize.xxl,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text,
-  },
-  messagesButton: {
-    padding: spacing.xs,
-  },
   filtersContainer: {
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
@@ -259,11 +227,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
   },
   filterTagActive: {
-    backgroundColor: colors.text,
-    borderColor: colors.text,
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   filterTagText: {
     fontSize: typography.fontSize.sm,
@@ -271,7 +239,7 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   filterTagTextActive: {
-    color: colors.background,
+    color: '#FFFFFF',
   },
   content: {
     flex: 1,
@@ -318,14 +286,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   actionButtonSecondary: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
   },
   actionButtonText: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.semibold,
-    color: colors.background,
+    color: '#FFFFFF',
   },
   actionButtonTextSecondary: {
     color: colors.text,

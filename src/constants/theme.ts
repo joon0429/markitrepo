@@ -1,24 +1,24 @@
 // Theme constants for Mark-it app
-// Using platform-native defaults with Material Design theming from react-native-paper
+// Dark mode theme with Material Design principles
 
 export const colors = {
-  primary: '#6200EE',
+  primary: '#BB86FC',
   primaryVariant: '#3700B3',
   secondary: '#03DAC6',
-  background: '#FFFFFF',
-  surface: '#FFFFFF',
-  error: '#B00020',
+  background: '#121212',
+  surface: '#1E1E1E',
+  error: '#CF6679',
 
-  text: '#000000',
-  textSecondary: '#666666',
-  textTertiary: '#999999',
+  text: '#FFFFFF',
+  textSecondary: '#B3B3B3',
+  textTertiary: '#808080',
 
-  border: '#E0E0E0',
-  divider: '#F0F0F0',
+  border: '#2C2C2C',
+  divider: '#1A1A1A',
 
-  success: '#4CAF50',
-  warning: '#FF9800',
-  info: '#2196F3',
+  success: '#81C784',
+  warning: '#FFB74D',
+  info: '#64B5F6',
 };
 
 export const spacing = {
@@ -60,21 +60,21 @@ export const shadows = {
   sm: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.18,
+    shadowOpacity: 0.3,
     shadowRadius: 1.0,
     elevation: 1,
   },
   md: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.20,
+    shadowOpacity: 0.35,
     shadowRadius: 1.41,
     elevation: 2,
   },
   lg: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.22,
+    shadowOpacity: 0.4,
     shadowRadius: 2.22,
     elevation: 3,
   },
