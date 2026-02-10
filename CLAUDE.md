@@ -1,7 +1,7 @@
 # CLAUDE.md - project context & design system
 
 > this file is automatically read by claude code at the start of every conversation.
-> last updated: 2026-02-09
+> last updated: 2026-02-10
 
 ---
 
@@ -107,7 +107,7 @@
 | form input limits | title: 50 chars, description: 50 words | prevents excessive input, enforced during typing with live counters | 2026-02-06 |
 | placeholder images | PlaceholderImage component with triangle icon | all external image URLs replaced with 'placeholder' string; consistent fallback UI | 2026-02-06 |
 | tab navigation structure | 5 slots: home, notifs, create, map, profile | removed signup flow; simplified auth to email/password only; no regex validation | 2026-02-07 |
-| authentication flow | single login screen, no signup | simplified for MVP; email/password only, basic empty check validation | 2026-02-07 |
+| authentication flow | login + signup toggle on single screen | firebase email/password auth; toggle between sign in and create account; shows firebase error messages inline | 2026-02-10 |
 | profile layout | pinterest saved ideas pattern | horizontal stats, search bar, filter tags, boards grid; removed material tabs | 2026-02-07 |
 | board/closet selection | dropdown component with preset options | unified "board" terminology; predefined options: unnamed, clothes, shoes, furniture + "add more..." | 2026-02-07 |
 | listing organization | closet field (board name) + optional category field | closet = board name (user-facing), category = optional tag for filtering | 2026-02-07 |
@@ -119,6 +119,11 @@
 | header management | all headers via navigator screenOptions | removed custom in-screen headers from NotificationsScreen and MapScreen; defaultScreenOptions object shared across stacks | 2026-02-09 |
 | icon system | Ionicons from @expo/vector-icons | replaced all emoji icons (search, bookmark, share, send, empty states) with Ionicons; EmptyState component accepts Ionicons name string | 2026-02-09 |
 | scrollbar visibility | showsVerticalScrollIndicator={true} everywhere | visible scrollbars on all vertical ScrollViews and FlatLists for better UX affordance | 2026-02-09 |
+| firebase config | app.config.js (CommonJS) + .env file | converted app.json to app.config.js with module.exports; reads EXPO_PUBLIC_FIREBASE_* env vars into extra; .env in .gitignore | 2026-02-10 |
+| firebase auth | firebase/auth with onAuthStateChanged | AuthContext uses real firebase auth; exposes signIn, signUp, signOut, error, clearError; FirebaseUser + User (firestore profile) | 2026-02-10 |
+| user service | firestore users/{uid} collection | createUserProfile on signup (auto-generates username from email), getUserProfile, updateUserProfile in userService.ts | 2026-02-10 |
+| firebase storage | DEFERRED -- requires paid firebase plan | all photo fields use 'placeholder' strings for now; add storageService.ts later when storage is enabled | 2026-02-10 |
+| auth method | email/password now, phone auth later | phone auth requires native modules (won't work in Expo Go); add when moving to EAS dev builds for testflight | 2026-02-10 |
 
 ### code conventions
 
@@ -147,6 +152,9 @@
 | emoji icons in components | used emoji characters as UI icons (search, bookmark, etc.) violating no-emoji rule | use Ionicons from @expo/vector-icons for all icons; EmptyState accepts Ionicons name strings | 2026-02-09 |
 | undefined color references | CreateListingScreen used colors.backgroundSecondary which didn't exist in theme | always reference colors defined in theme.ts; use colors.surface for elevated input backgrounds | 2026-02-09 |
 | custom headers vs navigator headers | NotificationsScreen and MapScreen had custom in-screen headers causing inconsistency | always configure headers via navigator screenOptions; share defaultScreenOptions across stacks | 2026-02-09 |
+| app.config.js ES module syntax | used `export default` in app.config.js causing expo to fail silently | use `module.exports` (CommonJS) in app.config.js -- expo expects CommonJS format | 2026-02-10 |
+| expo start after config changes | app wouldn't load after changing app.json to app.config.js | always run `npx expo start --clear` after config file changes to reset metro bundler cache | 2026-02-10 |
+| node/npx not available in windows terminal | claude code runs in git bash (windows) where nvm-installed node isn't on PATH | user must test in WSL terminal where node was installed via nvm; claude cannot run expo commands directly | 2026-02-10 |
 
 ---
 
@@ -189,8 +197,13 @@
 4. ~~build navigation skeleton (hollow frame)~~
 5. ~~create placeholder screens with mock data~~
 6. ~~implement UI framework without firebase~~ (complete: Feed, Create, Profile, Friends, Messages/Chat)
-7. configure firebase for authentication and data persistence
-8. integrate firebase into existing screens
+7. ~~configure firebase project and credentials~~ (phase 1 complete: .env, app.config.js, firebase config)
+8. ~~replace mock auth with firebase auth~~ (phase 2 complete: AuthContext, LoginScreen, userService) -- NEEDS TESTING
+9. create firestore service layer (phase 3: listingService, friendService, messageService)
+10. create custom hooks (phase 4: useListings, useProfile, useFriends, useMessages, useChat)
+11. migrate screens one at a time (phase 5: profile → feed → create → detail → friends → messages → chat → boards)
+12. firestore security rules + indexes (phase 6)
+13. seed data script for testing (phase 7)
 
 ---
 
@@ -270,3 +283,28 @@
 - **simplified board flow:** removed EditBoard multi-select functionality; direct flow is profile → board detail → edit item
 - **navigation cleanup:** removed unused createSimpleStack helper, properly structured all stack navigators
 - **updated navigation graph:** documented complete vertex/edge structure for all screens and navigation flows
+
+### 2026-02-10 - firebase integration (phases 1-2)
+- **phase 1 (complete):** firebase project setup and credential wiring
+  - created `.env` file with 6 firebase config values (apiKey, authDomain, projectId, storageBucket, messagingSenderId, appId)
+  - converted `app.json` to `app.config.js` (CommonJS format) to read env vars into `extra` field
+  - updated `src/services/firebase/config.ts` to read from Constants.expoConfig.extra with process.env fallback
+  - removed `getStorage` import (storage deferred -- requires paid plan)
+  - deleted old `app.json` (replaced by `app.config.js`)
+  - firebase project: markit-80348
+- **phase 2 (complete, NEEDS TESTING on device):** firebase auth replacing mock auth
+  - rewrote `src/contexts/AuthContext.tsx`: real firebase auth with onAuthStateChanged, signIn, signUp, signOut, error handling
+  - AuthContext now exposes: user (FirebaseUser), userProfile (User from firestore), loading, error, signIn, signUp, signOut, clearError
+  - updated `src/screens/auth/LoginScreen.tsx`: toggle between sign in / create account, inline error display, clears errors on input change
+  - created `src/services/firebase/userService.ts`: createUserProfile (on signup), getUserProfile, updateUserProfile
+  - AppNavigator.tsx confirmed compatible (only uses user + loading from auth context)
+  - enabled services in firebase console: authentication (email/password), cloud firestore (test mode), storage SKIPPED
+- **what still needs testing:** user needs to restart dev server (`npx expo start --clear`), create an account, verify user appears in firebase console (both authentication tab and firestore users collection), sign out, sign back in
+- **remaining phases (not started):**
+  - phase 3: firestore service layer (listingService.ts, friendService.ts, messageService.ts)
+  - phase 4: custom hooks (useListings, useProfile, useFriends, useMessages, useChat)
+  - phase 5: screen migration (profile → feed → create → detail → friends → conversations → chat → boards)
+  - phase 6: firestore security rules + composite indexes
+  - phase 7: seed data script
+- **detailed plan file:** `C:\Users\jkwon\.claude\plans\validated-toasting-castle.md` has full implementation details for all 7 phases
+- **key constraints discovered:** node/npx only available in WSL terminal (not windows git bash); expo go supports firebase email/password auth but NOT phone auth (needs native modules); storage requires paid firebase plan
