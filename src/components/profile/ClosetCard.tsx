@@ -1,15 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Board } from '@types/profile';
+import { Closet } from '@types/profile';
 import PlaceholderImage from '@components/common/PlaceholderImage';
 import { colors, spacing, borderRadius, typography } from '@constants/theme';
 
-interface BoardCardProps {
-  board: Board;
+interface ClosetCardProps {
+  closet: Closet;
   onPress: () => void;
 }
 
-export default function BoardCard({ board, onPress }: BoardCardProps) {
+export default function ClosetCard({ closet, onPress }: ClosetCardProps) {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.9}>
       <View style={styles.gridContainer}>
@@ -24,8 +24,8 @@ export default function BoardCard({ board, onPress }: BoardCardProps) {
       </View>
 
       <View style={styles.infoSection}>
-        <Text style={styles.boardName} numberOfLines={1}>{board.name}</Text>
-        <Text style={styles.itemCount}>{board.itemCount} items</Text>
+        <Text style={styles.closetName} numberOfLines={1}>{closet.name}</Text>
+        <Text style={styles.itemCount}>{closet.itemCount} items</Text>
       </View>
     </TouchableOpacity>
   );
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
     backgroundColor: colors.surface,
   },
-  boardName: {
+  closetName: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.semibold,
     color: colors.text,

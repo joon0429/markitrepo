@@ -47,8 +47,11 @@ export type MapStackParamList = {
 // profile stack
 export type ProfileStackParamList = {
   Profile: undefined;
-  BoardDetail: { boardName: string };
+  ClosetDetail: { closetName: string };
   EditItem: { listingId: string };
+  Settings: undefined;
+  SettingsPlaceholder: { title: string; description?: string };
+  EditProfile: undefined;
 };
 
 // navigation prop types

@@ -1,4 +1,4 @@
-export interface Board {
+export interface Closet {
   id: string;
   userId: string;
   name: string;

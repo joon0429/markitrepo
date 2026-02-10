@@ -5,7 +5,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { ProfileStackParamList } from '@navigation/types';
 import ProfileHeader from '@components/profile/ProfileHeader';
 import SearchBar from '@components/common/SearchBar';
-import BoardCard from '@components/profile/BoardCard';
+import ClosetCard from '@components/profile/ClosetCard';
 import LoadingSpinner from '@components/common/LoadingSpinner';
 import EmptyState from '@components/common/EmptyState';
 import { useProfile } from '@hooks/useProfile';
@@ -18,16 +18,16 @@ export default function ProfileScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTag, setActiveTag] = useState('tag1');
 
-  const { profile, boards, stats, loading, error } = useProfile();
+  const { profile, closets, stats, loading, error } = useProfile();
 
   const handleEditProfile = () => {
-    Alert.alert('edit profile', 'editing profile (coming soon)');
+    navigation.navigate('EditProfile');
   };
 
-  const handleBoardPress = (boardId: string) => {
-    const board = boards.find(b => b.id === boardId);
-    if (board) {
-      navigation.navigate('BoardDetail', { boardName: board.name });
+  const handleClosetPress = (closetId: string) => {
+    const closet = closets.find(c => c.id === closetId);
+    if (closet) {
+      navigation.navigate('ClosetDetail', { closetName: closet.name });
     }
   };
 
@@ -85,25 +85,25 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* boards grid */}
-        {boards.length === 0 ? (
+        {/* closets grid */}
+        {closets.length === 0 ? (
           <EmptyState
             icon="grid-outline"
-            title="no boards yet"
+            title="no closets yet"
             description="create a listing to start organizing your items"
           />
         ) : (
         <FlatList
-          data={boards}
+          data={closets}
           keyExtractor={(item) => item.id}
           numColumns={2}
           renderItem={({ item }) => (
-            <BoardCard
-              board={item}
-              onPress={() => handleBoardPress(item.id)}
+            <ClosetCard
+              closet={item}
+              onPress={() => handleClosetPress(item.id)}
             />
           )}
-          contentContainerStyle={styles.boardsListContent}
+          contentContainerStyle={styles.closetsListContent}
           showsVerticalScrollIndicator={true}
           scrollEnabled={false}
         />
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   activeTagText: {
     color: '#FFFFFF',
   },
-  boardsListContent: {
+  closetsListContent: {
     paddingHorizontal: spacing.xs,
     paddingTop: spacing.xs,
     paddingBottom: spacing.xl,

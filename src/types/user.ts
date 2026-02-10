@@ -36,6 +36,7 @@ export interface CreateUserInput {
 }
 
 export interface UpdateUserInput {
+  username?: string;
   displayName?: string;
   bio?: string;
   city?: string;

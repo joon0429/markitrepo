@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@contexts/AuthContext';
 import { getUserListings } from '@services/firebase/listingService';
 import { getUserProfile, updateUserProfile } from '@services/firebase/userService';
-import { User, Listing, UpdateUserInput, Board, UserStats } from '@types';
+import { User, Listing, UpdateUserInput, Closet, UserStats } from '@types';
 
 export function useProfile(userId?: string) {
   const { user, userProfile: authProfile } = useAuth();
@@ -46,8 +46,8 @@ export function useProfile(userId?: string) {
     fetchProfile();
   }, [fetchProfile]);
 
-  // compute boards from listings
-  const boards: Board[] = computeBoards(listings, targetUserId || '');
+  // compute closets from listings
+  const closets: Closet[] = computeClosets(listings, targetUserId || '');
 
   // compute stats
   const stats: UserStats = {
@@ -67,7 +67,7 @@ export function useProfile(userId?: string) {
   return {
     profile,
     listings,
-    boards,
+    closets,
     stats,
     loading,
     error,
@@ -76,8 +76,8 @@ export function useProfile(userId?: string) {
   };
 }
 
-// compute boards from a user's listings (grouped by closet)
-function computeBoards(listings: Listing[], userId: string): Board[] {
+// compute closets from a user's listings (grouped by closet field)
+function computeClosets(listings: Listing[], userId: string): Closet[] {
   const closetMap = new Map<string, Listing[]>();
 
   for (const listing of listings) {
@@ -88,10 +88,10 @@ function computeBoards(listings: Listing[], userId: string): Board[] {
     closetMap.get(closet)!.push(listing);
   }
 
-  const boards: Board[] = [];
+  const closets: Closet[] = [];
 
   for (const [name, items] of closetMap.entries()) {
-    boards.push({
+    closets.push({
       id: `${userId}-${name}`,
       userId,
       name,
@@ -103,5 +103,5 @@ function computeBoards(listings: Listing[], userId: string): Board[] {
     });
   }
 
-  return boards;
+  return closets;
 }

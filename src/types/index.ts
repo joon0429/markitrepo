@@ -23,4 +23,4 @@ export { serializeMessage, deserializeMessage, serializeConversation, deserializ
 export type { Notification, NotificationType } from './notification';
 
 // Profile types
-export type { Board, UserStats } from './profile';
+export type { Closet, UserStats } from './profile';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
@@ -13,8 +13,11 @@ import ChatScreen from '@screens/messages/ChatScreen';
 import NotificationsScreen from '@screens/notifications/NotificationsScreen';
 import MapScreen from '@screens/map/MapScreen';
 import ProfileScreen from '@screens/profile/ProfileScreen';
-import BoardDetailScreen from '@screens/profile/BoardDetailScreen';
+import ClosetDetailScreen from '@screens/profile/ClosetDetailScreen';
 import EditItemScreen from '@screens/profile/EditItemScreen';
+import SettingsScreen from '@screens/profile/SettingsScreen';
+import SettingsPlaceholderScreen from '@screens/profile/SettingsPlaceholderScreen';
+import EditProfileScreen from '@screens/profile/EditProfileScreen';
 import { colors, typography } from '@constants/theme';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -24,7 +27,13 @@ const MapStack = createStackNavigator<MapStackParamList>();
 const ProfileStack = createStackNavigator<ProfileStackParamList>();
 
 const defaultScreenOptions = {
-  headerStyle: { backgroundColor: colors.background },
+  headerStyle: {
+    backgroundColor: colors.background,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    elevation: 0,
+    shadowOpacity: 0,
+  },
   headerTintColor: colors.text,
   headerTitleStyle: {
     color: colors.text,
@@ -65,7 +74,17 @@ function FeedStackNavigator() {
       <FeedStack.Screen
         name="Conversations"
         component={ConversationsScreen}
-        options={{ title: 'messages' }}
+        options={{
+          title: 'messages',
+          headerRight: () => (
+            <TouchableOpacity
+              style={headerButtonStyles.messageButton}
+              onPress={() => Alert.alert('coming soon', 'start new conversation')}
+            >
+              <Ionicons name="add-outline" size={24} color={colors.text} />
+            </TouchableOpacity>
+          ),
+        }}
       />
       <FeedStack.Screen
         name="Chat"
@@ -97,7 +116,17 @@ function NotificationsStackNavigator() {
       <NotificationsStack.Screen
         name="Conversations"
         component={ConversationsScreen}
-        options={{ title: 'messages' }}
+        options={{
+          title: 'messages',
+          headerRight: () => (
+            <TouchableOpacity
+              style={headerButtonStyles.messageButton}
+              onPress={() => Alert.alert('coming soon', 'start new conversation')}
+            >
+              <Ionicons name="add-outline" size={24} color={colors.text} />
+            </TouchableOpacity>
+          ),
+        }}
       />
       <NotificationsStack.Screen
         name="Chat"
@@ -126,17 +155,42 @@ function ProfileStackNavigator() {
       <ProfileStack.Screen
         name="Profile"
         component={ProfileScreen}
-        options={{ title: 'profile' }}
+        options={({ navigation }) => ({
+          title: 'profile',
+          headerRight: () => (
+            <TouchableOpacity
+              style={headerButtonStyles.messageButton}
+              onPress={() => navigation.navigate('Settings')}
+            >
+              <Ionicons name="menu-outline" size={24} color={colors.text} />
+            </TouchableOpacity>
+          ),
+        })}
       />
       <ProfileStack.Screen
-        name="BoardDetail"
-        component={BoardDetailScreen}
+        name="ClosetDetail"
+        component={ClosetDetailScreen}
         options={{ title: '' }}
       />
       <ProfileStack.Screen
         name="EditItem"
         component={EditItemScreen}
         options={{ title: 'edit item' }}
+      />
+      <ProfileStack.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{ title: 'settings' }}
+      />
+      <ProfileStack.Screen
+        name="SettingsPlaceholder"
+        component={SettingsPlaceholderScreen}
+        options={({ route }) => ({ title: route.params.title })}
+      />
+      <ProfileStack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={{ title: 'edit profile' }}
       />
     </ProfileStack.Navigator>
   );

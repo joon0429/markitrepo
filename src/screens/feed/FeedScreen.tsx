@@ -37,7 +37,7 @@ function FeedList({ visibility }: { visibility: 'friends' | 'friends_plus' }) {
         <EmptyState
           icon="pricetag-outline"
           title="no listings yet"
-          description="add friends to see their listings here"
+          description={visibility === 'friends' ? 'add friends to see their listings here' : 'no second connection listings!'}
         />
       </View>
     );
@@ -83,7 +83,7 @@ export default function FeedScreen() {
       screenOptions={{
         tabBarActiveTintColor: colors.text,
         tabBarInactiveTintColor: colors.textTertiary,
-        tabBarIndicatorStyle: { backgroundColor: colors.primary },
+        tabBarIndicatorStyle: { height: 0 },
         tabBarStyle: {
           backgroundColor: colors.background,
           elevation: 0,
@@ -103,9 +103,9 @@ export default function FeedScreen() {
         options={{ title: 'my friends' }}
       />
       <Tab.Screen
-        name="friends of friends"
+        name="friends+"
         component={FriendsPlusTab}
-        options={{ title: 'friends of friends' }}
+        options={{ title: 'friends+' }}
       />
     </Tab.Navigator>
   );

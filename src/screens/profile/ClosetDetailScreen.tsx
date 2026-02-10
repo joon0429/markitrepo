@@ -11,30 +11,30 @@ import EmptyState from '@components/common/EmptyState';
 import { Listing } from '@types';
 import { colors, spacing, typography } from '@constants/theme';
 
-type BoardDetailRouteProp = RouteProp<ProfileStackParamList, 'BoardDetail'>;
-type BoardDetailNavigationProp = StackNavigationProp<ProfileStackParamList, 'BoardDetail'>;
+type ClosetDetailRouteProp = RouteProp<ProfileStackParamList, 'ClosetDetail'>;
+type ClosetDetailNavigationProp = StackNavigationProp<ProfileStackParamList, 'ClosetDetail'>;
 
-export default function BoardDetailScreen() {
-  const route = useRoute<BoardDetailRouteProp>();
-  const navigation = useNavigation<BoardDetailNavigationProp>();
+export default function ClosetDetailScreen() {
+  const route = useRoute<ClosetDetailRouteProp>();
+  const navigation = useNavigation<ClosetDetailNavigationProp>();
   const { user } = useAuth();
-  const { boardName } = route.params;
+  const { closetName } = route.params;
 
-  const [boardListings, setBoardListings] = useState<Listing[]>([]);
+  const [closetListings, setClosetListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchListings = useCallback(async () => {
     if (!user?.uid) return;
     try {
-      const results = await getListingsByCloset(user.uid, boardName);
-      setBoardListings(results);
+      const results = await getListingsByCloset(user.uid, closetName);
+      setClosetListings(results);
     } catch (err) {
       // silent fail
     } finally {
       setLoading(false);
     }
-  }, [user?.uid, boardName]);
+  }, [user?.uid, closetName]);
 
   useEffect(() => {
     fetchListings();
@@ -57,12 +57,12 @@ export default function BoardDetailScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.boardName}>{boardName}</Text>
-        <Text style={styles.itemCount}>{boardListings.length} items</Text>
+        <Text style={styles.closetName}>{closetName}</Text>
+        <Text style={styles.itemCount}>{closetListings.length} items</Text>
       </View>
 
       <FlatList
-        data={boardListings}
+        data={closetListings}
         keyExtractor={(item) => item.id}
         numColumns={2}
         renderItem={({ item }) => (
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-  boardName: {
+  closetName: {
     fontSize: typography.fontSize.xxl,
     fontWeight: typography.fontWeight.bold,
     color: colors.text,

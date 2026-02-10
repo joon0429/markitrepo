@@ -249,39 +249,35 @@ function EditItemForm({ listing, navigation }: { listing: Listing; navigation: E
 
         {/* item name */}
         <View style={styles.section}>
-          <View style={styles.inputHeader}>
-            <Text style={styles.inputLabel}>item name</Text>
-            <Text style={styles.charCount}>{title.length}/{TITLE_LIMIT}</Text>
-          </View>
           <Input
+            floatingLabel
+            label="item name"
             value={title}
             onChangeText={handleTitleChange}
             placeholder="add title..."
             error={errors.title}
           />
+          <Text style={styles.counterBelow}>{title.length}/{TITLE_LIMIT}</Text>
         </View>
 
         {/* price */}
         <View style={styles.section}>
-          <Text style={styles.inputLabel}>price</Text>
           <Input
+            floatingLabel
+            label="price"
             value={price}
             onChangeText={handlePriceChange}
             placeholder="$0.00"
-            keyboardType="decimal-pad"
+            keyboardType="number-pad"
             error={errors.price}
           />
         </View>
 
         {/* description */}
         <View style={styles.section}>
-          <View style={styles.inputHeader}>
-            <Text style={styles.inputLabel}>description</Text>
-            <Text style={styles.charCount}>
-              {getWordCount(description)}/{DESCRIPTION_WORD_LIMIT} words
-            </Text>
-          </View>
           <Input
+            floatingLabel
+            label="description"
             value={description}
             onChangeText={handleDescriptionChange}
             placeholder="add description..."
@@ -289,22 +285,25 @@ function EditItemForm({ listing, navigation }: { listing: Listing; navigation: E
             numberOfLines={4}
             error={errors.description}
           />
+          <Text style={styles.counterBelow}>
+            {getWordCount(description)}/{DESCRIPTION_WORD_LIMIT} words
+          </Text>
         </View>
 
         {/* closet */}
         <View style={styles.section}>
           <Dropdown
-            label="board / closet"
+            label="closet"
             value={closet}
             onChange={(value) => {
               if (value === 'add_more') {
-                Alert.alert('add more boards', 'create custom boards (coming soon)');
+                Alert.alert('add more closets', 'create custom closets (coming soon)');
               } else {
                 setCloset(value);
               }
             }}
             options={closetOptions}
-            placeholder="select a board..."
+            placeholder="select a closet..."
             error={errors.closet}
           />
         </View>
@@ -313,7 +312,7 @@ function EditItemForm({ listing, navigation }: { listing: Listing; navigation: E
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>privacy</Text>
           <View style={styles.toggleRow}>
-            <Text style={styles.toggleLabel}>make this a private listing</Text>
+            <Text style={styles.toggleLabel}>make private</Text>
             <Switch
               value={isPrivate}
               onValueChange={setIsPrivate}
@@ -428,21 +427,11 @@ const styles = StyleSheet.create({
     fontSize: 32,
     color: colors.textTertiary,
   },
-  inputHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
-  },
-  inputLabel: {
-    fontSize: typography.fontSize.md,
-    fontWeight: typography.fontWeight.semibold,
-    color: colors.text,
-    marginBottom: spacing.xs,
-  },
-  charCount: {
+  counterBelow: {
     fontSize: typography.fontSize.sm,
     color: colors.textTertiary,
+    marginTop: -spacing.sm,
+    marginBottom: spacing.sm,
   },
   toggleRow: {
     flexDirection: 'row',

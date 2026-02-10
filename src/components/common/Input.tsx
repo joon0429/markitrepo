@@ -1,13 +1,47 @@
 import React from 'react';
 import { View, TextInput, Text, StyleSheet, TextInputProps } from 'react-native';
+import { TextInput as PaperTextInput } from 'react-native-paper';
 import { colors, spacing, borderRadius, typography } from '@constants/theme';
 
 interface InputProps extends TextInputProps {
   label?: string;
   error?: string;
+  floatingLabel?: boolean;
 }
 
-export default function Input({ label, error, style, ...props }: InputProps) {
+export default function Input({ label, error, style, floatingLabel, ...props }: InputProps) {
+  if (floatingLabel && label) {
+    return (
+      <View style={styles.container}>
+        <PaperTextInput
+          label={label}
+          mode="outlined"
+          value={props.value}
+          onChangeText={props.onChangeText}
+          placeholder={props.placeholder}
+          multiline={props.multiline}
+          numberOfLines={props.numberOfLines}
+          keyboardType={props.keyboardType}
+          autoCapitalize={props.autoCapitalize}
+          error={!!error}
+          style={[styles.paperInput, props.multiline && styles.paperInputMultiline, style]}
+          outlineColor={colors.border}
+          activeOutlineColor={colors.primary}
+          textColor={colors.text}
+          placeholderTextColor={colors.textTertiary}
+          theme={{
+            colors: {
+              background: colors.surface,
+              onSurfaceVariant: colors.textTertiary,
+              error: colors.error,
+            },
+          }}
+        />
+        {error && <Text style={styles.errorText}>{error}</Text>}
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {label && <Text style={styles.label}>{label}</Text>}
@@ -44,6 +78,13 @@ const styles = StyleSheet.create({
   },
   inputError: {
     borderColor: colors.error,
+  },
+  paperInput: {
+    fontSize: typography.fontSize.md,
+    backgroundColor: colors.surface,
+  },
+  paperInputMultiline: {
+    minHeight: 100,
   },
   errorText: {
     fontSize: typography.fontSize.xs,
