@@ -1,0 +1,78 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // users collection
+    match /users/{userId} {
+      // anyone authenticated can read user profiles (needed for friend lookup, search)
+      allow read: if request.auth != null;
+      // only the user can write their own profile
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // listings collection
+    match /listings/{listingId} {
+      // any authenticated user can read listings
+      // (visibility filtering is done client-side based on friend relationships)
+      allow read: if request.auth != null;
+      // only the seller can create/update/delete their own listings
+      allow create: if request.auth != null
+        && request.resource.data.sellerId == request.auth.uid;
+      allow update: if request.auth != null
+        && (resource.data.sellerId == request.auth.uid
+            // allow any authenticated user to update markedBy (for marking)
+            || (request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['markedBy', 'updatedAt'])));
+      allow delete: if request.auth != null
+        && resource.data.sellerId == request.auth.uid;
+    }
+
+    // friend requests collection
+    match /friendRequests/{requestId} {
+      // sender or receiver can read
+      allow read: if request.auth != null
+        && (resource.data.fromUserId == request.auth.uid
+            || resource.data.toUserId == request.auth.uid);
+      // any authenticated user can create a friend request
+      allow create: if request.auth != null
+        && request.resource.data.fromUserId == request.auth.uid;
+      // sender or receiver can update (accept/reject)
+      allow update: if request.auth != null
+        && (resource.data.fromUserId == request.auth.uid
+            || resource.data.toUserId == request.auth.uid);
+    }
+
+    // conversations collection
+    match /conversations/{conversationId} {
+      // only participants can read/write
+      allow read: if request.auth != null
+        && request.auth.uid in resource.data.participantIds;
+      allow create: if request.auth != null
+        && request.auth.uid in request.resource.data.participantIds;
+      allow update: if request.auth != null
+        && request.auth.uid in resource.data.participantIds;
+
+      // messages subcollection
+      match /messages/{messageId} {
+        // participants of parent conversation can read/write messages
+        allow read: if request.auth != null
+          && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds;
+        allow create: if request.auth != null
+          && request.resource.data.senderId == request.auth.uid
+          && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds;
+      }
+    }
+
+    // notifications collection
+    match /notifications/{notificationId} {
+      // only the target user can read their notifications
+      allow read: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+      // any authenticated user can create notifications (system creates them)
+      allow create: if request.auth != null;
+      // only the target user can update (mark as read)
+      allow update: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+    }
+  }
+}

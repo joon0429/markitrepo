@@ -15,6 +15,9 @@ import { useNavigation } from '@react-navigation/native';
 import Button from '@components/common/Button';
 import Input from '@components/common/Input';
 import Dropdown from '@components/common/Dropdown';
+import { useAuth } from '@contexts/AuthContext';
+import { createListing } from '@services/firebase/listingService';
+import { CreateListingInput } from '@types';
 import { colors, spacing, typography } from '@constants/theme';
 
 interface PhotoSlot {
@@ -24,6 +27,8 @@ interface PhotoSlot {
 
 export default function CreateListingScreen() {
   const navigation = useNavigation();
+  const { user, userProfile } = useAuth();
+  const [creating, setCreating] = useState(false);
 
   // form state
   const [photos, setPhotos] = useState<PhotoSlot[]>([
@@ -166,22 +171,40 @@ export default function CreateListingScreen() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleCreate = () => {
-    if (!validateForm()) {
+  const handleCreate = async () => {
+    if (!validateForm() || !user?.uid || !userProfile?.username) {
       return;
     }
 
-    // mock listing creation
-    Alert.alert(
-      'success',
-      'listing created! (mock)',
-      [
-        {
-          text: 'ok',
-          onPress: () => navigation.goBack(),
-        },
-      ]
-    );
+    setCreating(true);
+    try {
+      const input: CreateListingInput = {
+        title: title.trim(),
+        description: description.trim(),
+        price: parseFloat(price),
+        photoURIs: photos.filter(p => p.uri).map(p => p.uri!),
+        closet: closet || 'unnamed',
+        category: undefined,
+        visibility: isPrivate ? 'friends' : 'friends_plus',
+      };
+
+      await createListing(user.uid, userProfile.username, input);
+
+      Alert.alert(
+        'success',
+        'listing created!',
+        [
+          {
+            text: 'ok',
+            onPress: () => navigation.goBack(),
+          },
+        ]
+      );
+    } catch (err: any) {
+      Alert.alert('error', err.message || 'failed to create listing');
+    } finally {
+      setCreating(false);
+    }
   };
 
   // count how many photos have been added

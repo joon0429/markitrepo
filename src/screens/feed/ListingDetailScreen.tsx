@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Share } from 'react-native';
 import { useRoute, RouteProp, useNavigation, CompositeNavigationProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -7,6 +7,11 @@ import { FeedStackParamList, MainTabParamList } from '@navigation/types';
 import { Ionicons } from '@expo/vector-icons';
 import PhotoCarousel from '@components/listings/PhotoCarousel';
 import Avatar from '@components/common/Avatar';
+import { useListingDetail } from '@hooks/useListingDetail';
+import { useAuth } from '@contexts/AuthContext';
+import { createConversation } from '@services/firebase/messageService';
+import { serializeConversation, Conversation } from '@types';
+import { Timestamp } from 'firebase/firestore';
 import { colors, spacing, typography } from '@constants/theme';
 
 type ListingDetailRouteProp = RouteProp<FeedStackParamList, 'ListingDetail'>;
@@ -21,59 +26,68 @@ export default function ListingDetailScreen() {
   const navigation = useNavigation<ListingDetailNavigationProp>();
   const { listing } = route.params;
 
-  // mock current user id for marking logic
-  const currentUserId = 'mock-user-1';
-  const [isMarked, setIsMarked] = useState(
-    listing.markedBy.includes(currentUserId)
-  );
-  const [markCount, setMarkCount] = useState(listing.markedBy.length);
+  const { user, userProfile } = useAuth();
+  const { isMarked, markCount, toggleMark, doubleTapMark } = useListingDetail(listing);
 
   const handleMark = () => {
-    if (isMarked) {
-      // unmark
-      setIsMarked(false);
-      setMarkCount(markCount - 1);
-    } else {
-      // mark
-      setIsMarked(true);
-      setMarkCount(markCount + 1);
-    }
+    toggleMark();
   };
 
   const handleDoubleTap = () => {
-    if (!isMarked) {
-      setIsMarked(true);
-      setMarkCount(markCount + 1);
+    doubleTapMark();
+  };
+
+  const handleMessageSeller = async () => {
+    if (!user?.uid || !userProfile?.username) return;
+
+    // don't message yourself
+    if (listing.sellerId === user.uid) {
+      Alert.alert('', 'this is your own listing');
+      return;
+    }
+
+    try {
+      const conversationId = await createConversation(
+        listing.id,
+        listing.title,
+        user.uid,
+        userProfile.username,
+        listing.sellerId,
+        listing.sellerUsername
+      );
+
+      // build a conversation object for navigation
+      const now = Timestamp.now();
+      const conv: Conversation = {
+        id: conversationId,
+        listingId: listing.id,
+        listingTitle: listing.title,
+        listingPhotoURL: listing.photos?.[0] || 'placeholder',
+        participantIds: [user.uid, listing.sellerId],
+        participants: {
+          [user.uid]: { username: userProfile.username },
+          [listing.sellerId]: { username: listing.sellerUsername },
+        },
+        unreadCount: { [user.uid]: 0, [listing.sellerId]: 0 },
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      navigation.navigate('Chat' as any, {
+        conversationId,
+        conversation: serializeConversation(conv),
+      });
+    } catch (err: any) {
+      Alert.alert('error', err.message || 'failed to start conversation');
     }
   };
 
-  const handleMessageSeller = () => {
-    // navigate to chat screen with this listing context
-    // for now, show placeholder alert since chat integration needs conversation ID
-    Alert.alert(
-      'send message',
-      `this would open a chat with ${listing.sellerUsername} about "${listing.title}"`,
-      [{ text: 'ok' }]
-    );
-    // TODO: when firebase is integrated, create/navigate to conversation
-    // navigation.navigate('MessagesStack', {
-    //   screen: 'Chat',
-    //   params: { conversationId: 'xxx', conversation: {...} }
-    // });
-  };
-
   const handleViewProfile = () => {
-    // navigate to seller's profile
     Alert.alert(
       'view profile',
-      `this would navigate to ${listing.sellerUsername}'s profile`,
+      `${listing.sellerUsername}'s profile (coming soon)`,
       [{ text: 'ok' }]
     );
-    // TODO: when user profile screen is added to navigation
-    // navigation.navigate('ProfileStack', {
-    //   screen: 'UserProfile',
-    //   params: { userId: listing.sellerId }
-    // });
   };
 
   const handleShare = async () => {

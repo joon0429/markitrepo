@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ProfileStackParamList } from '@navigation/types';
-import { mockListings } from '@services/mock/listings';
+import { useAuth } from '@contexts/AuthContext';
+import { getListingsByCloset } from '@services/firebase/listingService';
 import ListingCard from '@components/listings/ListingCard';
-import { serializeListing } from '@types';
+import LoadingSpinner from '@components/common/LoadingSpinner';
+import EmptyState from '@components/common/EmptyState';
+import { Listing } from '@types';
 import { colors, spacing, typography } from '@constants/theme';
 
 type BoardDetailRouteProp = RouteProp<ProfileStackParamList, 'BoardDetail'>;
@@ -14,22 +17,42 @@ type BoardDetailNavigationProp = StackNavigationProp<ProfileStackParamList, 'Boa
 export default function BoardDetailScreen() {
   const route = useRoute<BoardDetailRouteProp>();
   const navigation = useNavigation<BoardDetailNavigationProp>();
+  const { user } = useAuth();
   const { boardName } = route.params;
 
+  const [boardListings, setBoardListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // filter listings by board/closet name
-  const boardListings = mockListings.filter(listing => listing.closet === boardName);
+  const fetchListings = useCallback(async () => {
+    if (!user?.uid) return;
+    try {
+      const results = await getListingsByCloset(user.uid, boardName);
+      setBoardListings(results);
+    } catch (err) {
+      // silent fail
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.uid, boardName]);
+
+  useEffect(() => {
+    fetchListings();
+  }, [fetchListings]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await fetchListings();
     setRefreshing(false);
   };
 
   const handleListingPress = (listingId: string) => {
     navigation.navigate('EditItem', { listingId });
   };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <View style={styles.container}>

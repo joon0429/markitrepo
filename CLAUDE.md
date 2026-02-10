@@ -22,11 +22,6 @@
 | `@update-claude-md` | ask claude to update this doc | `@update-claude-md add our button pattern decision` |
 | `@design-check` | ask claude to verify against design principles | `@design-check does this follow our swipe patterns?` |
 | `@explain-decision` | ask claude to explain reasoning with design context | `@explain-decision why this approach?` |
-
-### quick commands
-
-- `"review claude.md"` - get a summary of current principles/constraints
-
 ---
 
 ## project overview
@@ -50,14 +45,11 @@
 - **"mark.it" action:** soft reservation system - seller sees who marked
 - **messaging:** real-time chat tied to specific listings with listing context card
 - **touch targets:** platform-native sizing (iOS HIG / Material Design standards)
-- **pinterest-style profile:** horizontal stats row (items/followers/following), search bar, filter tags, boards grid (2 columns)
 - **instagram-style UX:** friends list with search, DM-style conversations
 - **dropdown selectors:** modal overlay with option list for structured inputs (boards/closets)
 - **search:** instant filtering (no debounce) for small datasets like friends list
 - **unread indicators:** primary-colored dot + bold text for unread conversations/messages
-- **headers:** all screen headers managed via navigator config (not custom in-screen headers); dark background with white text
 - **message bubbles:** primary color background (right-aligned) for own messages, surface color background (left-aligned) for others
-- **board management:** profile → board detail → edit item (simplified flow, no multi-select)
 - **listing detail layout:** share button (top right), simplified seller info, mark count badge, bottom action buttons (mark it + send message)
 - **messages access:** envelope icon in feed header navigates to conversations
 - **toggle switches:** privacy settings use native switch component instead of button groups
@@ -124,6 +116,17 @@
 | user service | firestore users/{uid} collection | createUserProfile on signup (auto-generates username from email), getUserProfile, updateUserProfile in userService.ts | 2026-02-10 |
 | firebase storage | DEFERRED -- requires paid firebase plan | all photo fields use 'placeholder' strings for now; add storageService.ts later when storage is enabled | 2026-02-10 |
 | auth method | email/password now, phone auth later | phone auth requires native modules (won't work in Expo Go); add when moving to EAS dev builds for testflight | 2026-02-10 |
+| firestore service layer | separate service file per feature domain | listingService.ts (CRUD + mark/unmark), friendService.ts (requests + search), messageService.ts (conversations + real-time messages) | 2026-02-10 |
+| custom hooks pattern | one hook per screen concern | useProfile (profile + computed boards/stats), useListings (feed data), useListingDetail (mark toggle), useFriends (friends + requests), useConversations (conversation list), useChat (real-time messages) | 2026-02-10 |
+| boards computed not stored | boards derived from listing.closet field | no boards collection in firestore; useProfile computes boards client-side by grouping listings by closet name | 2026-02-10 |
+| firestore 'in' query batching | batch friendIds into groups of 30 | firestore 'in' queries limited to 30 values; getFeedListings loops through batches and merges results | 2026-02-10 |
+| real-time chat via onSnapshot | useChat subscribes to messages subcollection | onSnapshot listener for live message updates in ChatScreen; other screens use one-time getDocs fetches | 2026-02-10 |
+| conversation deduplication | findConversation checks before creating | createConversation in messageService checks if conversation already exists for same listing + participants before creating new one | 2026-02-10 |
+| security rules | firestore.rules at project root | users can only write own profile; sellers can modify own listings; markedBy updates allowed for any auth user; conversation access limited to participants | 2026-02-10 |
+| composite indexes | firestore.indexes.json at project root | indexes for listings (sellerId + visibility + status + createdAt), conversations (participantIds + updatedAt), friendRequests (toUserId + status) | 2026-02-10 |
+| seed data approach | client SDK script (not admin SDK) | scripts/seed.ts uses firebase client SDK; requires manually created auth accounts + pasted UIDs; writes users, listings, friendRequests, conversations, messages | 2026-02-10 |
+| loading states | every screen shows LoadingSpinner while data loads | all migrated screens check hook's loading state and render LoadingSpinner component; empty states shown when data is loaded but empty | 2026-02-10 |
+| mock data preserved | mock files NOT deleted during migration | src/services/mock/ files kept as reference; screens no longer import from them but they remain for data shape reference | 2026-02-10 |
 
 ### code conventions
 
@@ -198,12 +201,16 @@
 5. ~~create placeholder screens with mock data~~
 6. ~~implement UI framework without firebase~~ (complete: Feed, Create, Profile, Friends, Messages/Chat)
 7. ~~configure firebase project and credentials~~ (phase 1 complete: .env, app.config.js, firebase config)
-8. ~~replace mock auth with firebase auth~~ (phase 2 complete: AuthContext, LoginScreen, userService) -- NEEDS TESTING
-9. create firestore service layer (phase 3: listingService, friendService, messageService)
-10. create custom hooks (phase 4: useListings, useProfile, useFriends, useMessages, useChat)
-11. migrate screens one at a time (phase 5: profile → feed → create → detail → friends → messages → chat → boards)
-12. firestore security rules + indexes (phase 6)
-13. seed data script for testing (phase 7)
+8. ~~replace mock auth with firebase auth~~ (phase 2 complete, tested)
+9. ~~create firestore service layer~~ (phase 3 complete: listingService, friendService, messageService)
+10. ~~create custom hooks~~ (phase 4 complete: useListings, useProfile, useListingDetail, useFriends, useConversations, useChat)
+11. ~~migrate screens one at a time~~ (phase 5 complete: all 9 screens migrated from mock data to firebase)
+12. ~~firestore security rules + indexes~~ (phase 6 complete: firestore.rules, firestore.indexes.json)
+13. ~~seed data script for testing~~ (phase 7 complete: scripts/seed.ts)
+14. TEST all screens on device (see testing checklist below)
+15. deploy firestore security rules (firebase console or firebase CLI)
+16. create composite indexes (firebase console or deploy firestore.indexes.json)
+17. push notifications (FCM integration -- post-MVP if needed)
 
 ---
 
@@ -292,19 +299,63 @@
   - removed `getStorage` import (storage deferred -- requires paid plan)
   - deleted old `app.json` (replaced by `app.config.js`)
   - firebase project: markit-80348
-- **phase 2 (complete, NEEDS TESTING on device):** firebase auth replacing mock auth
+- **phase 2 (complete, tested):** firebase auth replacing mock auth
   - rewrote `src/contexts/AuthContext.tsx`: real firebase auth with onAuthStateChanged, signIn, signUp, signOut, error handling
   - AuthContext now exposes: user (FirebaseUser), userProfile (User from firestore), loading, error, signIn, signUp, signOut, clearError
   - updated `src/screens/auth/LoginScreen.tsx`: toggle between sign in / create account, inline error display, clears errors on input change
   - created `src/services/firebase/userService.ts`: createUserProfile (on signup), getUserProfile, updateUserProfile
-  - AppNavigator.tsx confirmed compatible (only uses user + loading from auth context)
   - enabled services in firebase console: authentication (email/password), cloud firestore (test mode), storage SKIPPED
-- **what still needs testing:** user needs to restart dev server (`npx expo start --clear`), create an account, verify user appears in firebase console (both authentication tab and firestore users collection), sign out, sign back in
-- **remaining phases (not started):**
-  - phase 3: firestore service layer (listingService.ts, friendService.ts, messageService.ts)
-  - phase 4: custom hooks (useListings, useProfile, useFriends, useMessages, useChat)
-  - phase 5: screen migration (profile → feed → create → detail → friends → conversations → chat → boards)
-  - phase 6: firestore security rules + composite indexes
-  - phase 7: seed data script
-- **detailed plan file:** `C:\Users\jkwon\.claude\plans\validated-toasting-castle.md` has full implementation details for all 7 phases
-- **key constraints discovered:** node/npx only available in WSL terminal (not windows git bash); expo go supports firebase email/password auth but NOT phone auth (needs native modules); storage requires paid firebase plan
+  - auth tested and confirmed working on device
+
+### 2026-02-10 - firebase integration (phases 3-7: complete)
+- **phase 3 (complete): firestore service layer**
+  - created `src/services/firebase/listingService.ts`: createListing, getListingById, getUserListings, getFeedListings (with 30-item batching for 'in' queries), getListingsByCloset, updateListing, deleteListing (soft delete), markListing, unmarkListing
+  - created `src/services/firebase/friendService.ts`: getFriends (batch fetch profiles), getFriendRequests (with mutual count), sendFriendRequest (with duplicate/self checks), acceptFriendRequest (atomic batch: update request + both users' friendIds), declineFriendRequest, searchUsers (username prefix query)
+  - created `src/services/firebase/messageService.ts`: getUserConversations, getConversation, findConversation, createConversation (with dedup check), getMessages, subscribeToMessages (real-time onSnapshot), sendMessage (writes message + updates conversation lastMessage + increments unreadCount), markConversationRead
+- **phase 4 (complete): custom hooks**
+  - created `src/hooks/useProfile.ts`: fetches user profile + listings, computes boards and stats client-side from listings grouped by closet
+  - created `src/hooks/useListings.ts`: fetches feed listings by visibility using current user's friendIds
+  - created `src/hooks/useListingDetail.ts`: manages mark/unmark state with optimistic UI + firebase persistence
+  - created `src/hooks/useFriends.ts`: fetches friends + requests, exposes accept/decline/send/search functions
+  - created `src/hooks/useConversations.ts`: fetches user's conversations sorted by updatedAt
+  - created `src/hooks/useChat.ts`: real-time message subscription via onSnapshot, sendMessage, auto-marks conversation as read on open
+- **phase 5 (complete): screen migration (all 9 screens)**
+  - `ProfileScreen.tsx`: replaced mockUsers/getUserStats with useProfile hook; added LoadingSpinner + EmptyState for loading/error
+  - `CreateListingScreen.tsx`: wired form to createListing service via useAuth; photos still use placeholder strings (storage deferred)
+  - `BoardDetailScreen.tsx`: replaced mockListings filter with getListingsByCloset; added loading state
+  - `EditItemScreen.tsx`: replaced mockListings.find with getListingById; wired save to updateListing and delete to deleteListing; refactored into EditItemForm sub-component for async data loading
+  - `FeedScreen.tsx`: replaced mockListings filter with useListings hook; added loading/empty states per tab
+  - `ListingDetailScreen.tsx`: replaced mock currentUserId with useAuth; wired mark/unmark to useListingDetail hook; wired "send message" to createConversation + navigate to Chat
+  - `FriendsScreen.tsx`: replaced mockFriends/mockFriendRequests with useFriends hook; wired accept/decline to firebase
+  - `ConversationsScreen.tsx`: replaced getConversations mock with useConversations hook; uses auth uid instead of hardcoded 'user-1'
+  - `ChatScreen.tsx`: replaced mock messages with useChat hook (real-time onSnapshot); replaced uuid message creation with sendMessage service; removed Alert on send
+- **phase 6 (complete): firestore security rules + indexes**
+  - created `firestore.rules`: users (read any, write own), listings (read any, create/update/delete own, markedBy updates for any auth user), friendRequests (read/write sender or receiver), conversations (read/write participants only), messages subcollection (read/write conversation participants)
+  - created `firestore.indexes.json`: composite indexes for listings (sellerId + visibility + status + createdAt), listings (sellerId + closet + status + createdAt), conversations (participantIds + updatedAt), friendRequests (toUserId + status)
+- **phase 7 (complete): seed data script**
+  - created `scripts/seed.ts`: populates firestore with 4 test users, 12 listings, 1 friend request, 2 conversations with messages
+  - uses firebase client SDK (not admin); requires manually created auth accounts with UIDs pasted into USER_UIDS object
+  - run from WSL: `npx ts-node scripts/seed.ts`
+- **files created this session:**
+  - `src/services/firebase/listingService.ts`
+  - `src/services/firebase/friendService.ts`
+  - `src/services/firebase/messageService.ts`
+  - `src/hooks/useProfile.ts`
+  - `src/hooks/useListings.ts`
+  - `src/hooks/useListingDetail.ts`
+  - `src/hooks/useFriends.ts`
+  - `src/hooks/useConversations.ts`
+  - `src/hooks/useChat.ts`
+  - `firestore.rules`
+  - `firestore.indexes.json`
+  - `scripts/seed.ts`
+- **files modified this session:**
+  - `src/screens/profile/ProfileScreen.tsx` (mock → useProfile hook)
+  - `src/screens/profile/BoardDetailScreen.tsx` (mock → getListingsByCloset)
+  - `src/screens/profile/EditItemScreen.tsx` (mock → getListingById + updateListing + deleteListing)
+  - `src/screens/listings/CreateListingScreen.tsx` (mock → createListing service)
+  - `src/screens/feed/FeedScreen.tsx` (mock → useListings hook)
+  - `src/screens/feed/ListingDetailScreen.tsx` (mock → useListingDetail + createConversation)
+  - `src/screens/friends/FriendsScreen.tsx` (mock → useFriends hook)
+  - `src/screens/messages/ConversationsScreen.tsx` (mock → useConversations hook)
+  - `src/screens/messages/ChatScreen.tsx` (mock → useChat hook with real-time)

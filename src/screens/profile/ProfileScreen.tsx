@@ -6,71 +6,53 @@ import { ProfileStackParamList } from '@navigation/types';
 import ProfileHeader from '@components/profile/ProfileHeader';
 import SearchBar from '@components/common/SearchBar';
 import BoardCard from '@components/profile/BoardCard';
-import { mockUsers } from '@services/mock/listings';
-import { getUserStats } from '@services/mock/profiles';
+import LoadingSpinner from '@components/common/LoadingSpinner';
+import EmptyState from '@components/common/EmptyState';
+import { useProfile } from '@hooks/useProfile';
 import { colors, spacing, typography } from '@constants/theme';
-import { Board } from '@types/profile';
 
 type ProfileNavigationProp = StackNavigationProp<ProfileStackParamList, 'Profile'>;
-
-// current user (will be replaced with actual auth later)
-const currentUser = mockUsers[0]; // sarah_parker
-
-// mock boards for the profile
-const mockBoards: Board[] = [
-  {
-    id: '1',
-    name: 'unnamed',
-    itemCount: 0,
-    previewPhotos: [],
-    createdAt: new Date(),
-  },
-  {
-    id: '2',
-    name: 'clothes',
-    itemCount: 7,
-    previewPhotos: ['placeholder', 'placeholder', 'placeholder', 'placeholder'],
-    createdAt: new Date(),
-  },
-  {
-    id: '3',
-    name: 'shoes',
-    itemCount: 3,
-    previewPhotos: ['placeholder', 'placeholder'],
-    createdAt: new Date(),
-  },
-  {
-    id: '4',
-    name: 'furniture',
-    itemCount: 5,
-    previewPhotos: ['placeholder', 'placeholder', 'placeholder'],
-    createdAt: new Date(),
-  },
-];
 
 export default function ProfileScreen() {
   const navigation = useNavigation<ProfileNavigationProp>();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTag, setActiveTag] = useState('tag1');
-  const stats = getUserStats(currentUser.uid);
+
+  const { profile, boards, stats, loading, error } = useProfile();
 
   const handleEditProfile = () => {
     Alert.alert('edit profile', 'editing profile (coming soon)');
   };
 
   const handleBoardPress = (boardId: string) => {
-    const board = mockBoards.find(b => b.id === boardId);
+    const board = boards.find(b => b.id === boardId);
     if (board) {
       navigation.navigate('BoardDetail', { boardName: board.name });
     }
   };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (!profile) {
+    return (
+      <View style={styles.container}>
+        <EmptyState
+          icon="person-outline"
+          title="profile not found"
+          description={error || 'could not load your profile'}
+        />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={true}>
         {/* profile header */}
         <ProfileHeader
-          user={currentUser}
+          user={profile}
           stats={stats}
           isOwnProfile={true}
           onEditProfile={handleEditProfile}
@@ -104,8 +86,15 @@ export default function ProfileScreen() {
         </View>
 
         {/* boards grid */}
+        {boards.length === 0 ? (
+          <EmptyState
+            icon="grid-outline"
+            title="no boards yet"
+            description="create a listing to start organizing your items"
+          />
+        ) : (
         <FlatList
-          data={mockBoards}
+          data={boards}
           keyExtractor={(item) => item.id}
           numColumns={2}
           renderItem={({ item }) => (
@@ -118,6 +107,7 @@ export default function ProfileScreen() {
           showsVerticalScrollIndicator={true}
           scrollEnabled={false}
         />
+        )}
       </ScrollView>
     </View>
   );

@@ -1,28 +1,25 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import ConversationListItem from '@components/messages/ConversationListItem';
 import EmptyState from '@components/common/EmptyState';
-import { getConversations } from '@services/mock/messages';
-import { Conversation, SerializableConversation, serializeConversation } from '@types';
-import { colors, spacing } from '@constants/theme';
-
-// current user id (will be replaced with actual auth later)
-const CURRENT_USER_ID = 'user-1'; // sarah_parker
+import LoadingSpinner from '@components/common/LoadingSpinner';
+import { useAuth } from '@contexts/AuthContext';
+import { useConversations } from '@hooks/useConversations';
+import { Conversation, serializeConversation } from '@types';
+import { colors } from '@constants/theme';
 
 type MessagesNavigationProp = StackNavigationProp<any>;
 
 export default function ConversationsScreen() {
   const navigation = useNavigation<MessagesNavigationProp>();
-  const [refreshing, setRefreshing] = useState(false);
-
-  const conversations = getConversations();
+  const { user } = useAuth();
+  const { conversations, loading, refresh } = useConversations();
+  const currentUserId = user?.uid || '';
 
   const handleRefresh = async () => {
-    setRefreshing(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setRefreshing(false);
+    await refresh();
   };
 
   const handleConversationPress = (conversation: Conversation) => {
@@ -32,7 +29,11 @@ export default function ConversationsScreen() {
     });
   };
 
-  if (conversations.length === 0) {
+  if (loading && conversations.length === 0) {
+    return <LoadingSpinner />;
+  }
+
+  if (!loading && conversations.length === 0) {
     return (
       <View style={styles.container}>
         <EmptyState
@@ -52,14 +53,14 @@ export default function ConversationsScreen() {
         renderItem={({ item }) => (
           <ConversationListItem
             conversation={item}
-            currentUserId={CURRENT_USER_ID}
+            currentUserId={currentUserId}
             onPress={() => handleConversationPress(item)}
           />
         )}
         showsVerticalScrollIndicator={true}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
+            refreshing={loading}
             onRefresh={handleRefresh}
             tintColor={colors.primary}
           />

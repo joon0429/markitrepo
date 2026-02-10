@@ -5,30 +5,33 @@ import SearchBar from '@components/common/SearchBar';
 import FriendListItem from '@components/friends/FriendListItem';
 import FriendRequestItem from '@components/friends/FriendRequestItem';
 import EmptyState from '@components/common/EmptyState';
-import { mockFriends, mockFriendRequests, searchFriends } from '@services/mock/friends';
+import LoadingSpinner from '@components/common/LoadingSpinner';
+import { useFriends } from '@hooks/useFriends';
 import { colors, spacing, typography } from '@constants/theme';
 
 const Tab = createMaterialTopTabNavigator();
 
 function FriendsTab() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [refreshing, setRefreshing] = useState(false);
+  const { friends, loading, refresh, searchFriends } = useFriends();
 
   const filteredFriends = searchFriends(searchQuery);
 
   const handleRefresh = async () => {
-    setRefreshing(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setRefreshing(false);
+    await refresh();
   };
 
   const handleFriendPress = (friendId: string) => {
-    Alert.alert('view profile', `navigate to user profile ${friendId} (coming soon)`);
+    Alert.alert('view profile', `navigate to user profile (coming soon)`);
   };
 
   const handleMessage = (friendId: string) => {
-    Alert.alert('message', `start conversation with ${friendId} (coming soon)`);
+    Alert.alert('message', `start conversation (coming soon)`);
   };
+
+  if (loading && friends.length === 0) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <View style={styles.container}>
@@ -66,7 +69,7 @@ function FriendsTab() {
           showsVerticalScrollIndicator={true}
           refreshControl={
             <RefreshControl
-              refreshing={refreshing}
+              refreshing={loading}
               onRefresh={handleRefresh}
               tintColor={colors.primary}
             />
@@ -78,26 +81,31 @@ function FriendsTab() {
 }
 
 function RequestsTab() {
-  const [refreshing, setRefreshing] = useState(false);
-  const [requests, setRequests] = useState(mockFriendRequests);
+  const { requests, loading, refresh, acceptRequest, declineRequest } = useFriends();
 
   const handleRefresh = async () => {
-    setRefreshing(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setRefreshing(false);
+    await refresh();
   };
 
-  const handleAccept = (requestId: string) => {
-    Alert.alert('accept friend', `accepted friend request ${requestId}`);
-    // remove from list (in real app, would update Firebase)
-    setRequests(prevRequests => prevRequests.filter(req => req.id !== requestId));
+  const handleAccept = async (requestId: string) => {
+    try {
+      await acceptRequest(requestId);
+    } catch (err: any) {
+      Alert.alert('error', err.message || 'failed to accept request');
+    }
   };
 
-  const handleDecline = (requestId: string) => {
-    Alert.alert('decline friend', `declined friend request ${requestId}`);
-    // remove from list (in real app, would update Firebase)
-    setRequests(prevRequests => prevRequests.filter(req => req.id !== requestId));
+  const handleDecline = async (requestId: string) => {
+    try {
+      await declineRequest(requestId);
+    } catch (err: any) {
+      Alert.alert('error', err.message || 'failed to decline request');
+    }
   };
+
+  if (loading && requests.length === 0) {
+    return <LoadingSpinner />;
+  }
 
   if (requests.length === 0) {
     return (
@@ -126,7 +134,7 @@ function RequestsTab() {
         showsVerticalScrollIndicator={true}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
+            refreshing={loading}
             onRefresh={handleRefresh}
             tintColor={colors.primary}
           />

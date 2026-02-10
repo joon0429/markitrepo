@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Listing, serializeListing } from '@types';
 import { FeedStackParamList } from '@navigation/types';
-import { mockListings } from '@services/mock/listings';
+import { useListings } from '@hooks/useListings';
 import ListingCard from '@components/listings/ListingCard';
+import LoadingSpinner from '@components/common/LoadingSpinner';
+import EmptyState from '@components/common/EmptyState';
 import { colors, spacing, typography } from '@constants/theme';
 
 const Tab = createMaterialTopTabNavigator();
@@ -15,21 +17,31 @@ type FeedNavigationProp = StackNavigationProp<FeedStackParamList, 'Feed'>;
 
 function FeedList({ visibility }: { visibility: 'friends' | 'friends_plus' }) {
   const navigation = useNavigation<FeedNavigationProp>();
-  const [refreshing, setRefreshing] = useState(false);
-
-  // filter listings by visibility
-  const listings = mockListings.filter(listing => listing.visibility === visibility);
+  const { listings, loading, refresh } = useListings(visibility);
 
   const handleRefresh = async () => {
-    setRefreshing(true);
-    // simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setRefreshing(false);
+    await refresh();
   };
 
   const handleCardPress = (listing: Listing) => {
     navigation.navigate('ListingDetail', { listing: serializeListing(listing) });
   };
+
+  if (loading && listings.length === 0) {
+    return <LoadingSpinner />;
+  }
+
+  if (!loading && listings.length === 0) {
+    return (
+      <View style={styles.container}>
+        <EmptyState
+          icon="pricetag-outline"
+          title="no listings yet"
+          description="add friends to see their listings here"
+        />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -47,7 +59,7 @@ function FeedList({ visibility }: { visibility: 'friends' | 'friends_plus' }) {
         showsVerticalScrollIndicator={true}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
+            refreshing={loading}
             onRefresh={handleRefresh}
             tintColor={colors.primary}
           />

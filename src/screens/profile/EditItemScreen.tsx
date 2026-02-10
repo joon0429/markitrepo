@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,10 +14,12 @@ import {
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ProfileStackParamList } from '@navigation/types';
-import { mockListings } from '@services/mock/listings';
+import { getListingById, updateListing, deleteListing } from '@services/firebase/listingService';
 import Button from '@components/common/Button';
 import Input from '@components/common/Input';
 import Dropdown from '@components/common/Dropdown';
+import LoadingSpinner from '@components/common/LoadingSpinner';
+import { Listing } from '@types';
 import { colors, spacing, typography } from '@constants/theme';
 
 type EditItemRouteProp = RouteProp<ProfileStackParamList, 'EditItem'>;
@@ -33,16 +35,34 @@ export default function EditItemScreen() {
   const navigation = useNavigation<EditItemNavigationProp>();
   const { listingId } = route.params;
 
-  // find the listing to edit
-  const listing = mockListings.find(l => l.id === listingId);
+  const [listing, setListing] = useState<Listing | null>(null);
+  const [loadingListing, setLoadingListing] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      const result = await getListingById(listingId);
+      setListing(result);
+      setLoadingListing(false);
+    }
+    load();
+  }, [listingId]);
+
+  if (loadingListing) {
+    return <LoadingSpinner />;
+  }
 
   if (!listing) {
     return (
       <View style={styles.container}>
-        <Text>listing not found</Text>
+        <Text style={{ color: colors.text }}>listing not found</Text>
       </View>
     );
   }
+
+  return <EditItemForm listing={listing} navigation={navigation} />;
+}
+
+function EditItemForm({ listing, navigation }: { listing: Listing; navigation: EditItemNavigationProp }) {
 
   // form state (initialized with existing listing data)
   const [photos, setPhotos] = useState<PhotoSlot[]>(
@@ -126,17 +146,28 @@ export default function EditItemScreen() {
     return text.trim().split(/\s+/).filter(word => word.length > 0).length;
   };
 
-  const handleSave = () => {
-    Alert.alert(
-      'success',
-      'listing updated! (mock)',
-      [
-        {
-          text: 'ok',
-          onPress: () => navigation.goBack(),
-        },
-      ]
-    );
+  const handleSave = async () => {
+    try {
+      await updateListing(listing.id, {
+        title: title.trim(),
+        description: description.trim(),
+        price: parseFloat(price),
+        closet: closet || 'unnamed',
+        visibility: isPrivate ? 'friends' : 'friends_plus',
+      });
+      Alert.alert(
+        'success',
+        'listing updated!',
+        [
+          {
+            text: 'ok',
+            onPress: () => navigation.goBack(),
+          },
+        ]
+      );
+    } catch (err: any) {
+      Alert.alert('error', err.message || 'failed to update listing');
+    }
   };
 
   const handleDelete = () => {
@@ -148,9 +179,14 @@ export default function EditItemScreen() {
         {
           text: 'delete',
           style: 'destructive',
-          onPress: () => {
-            Alert.alert('deleted', 'listing deleted (mock)');
-            navigation.goBack();
+          onPress: async () => {
+            try {
+              await deleteListing(listing.id);
+              Alert.alert('deleted', 'listing deleted');
+              navigation.goBack();
+            } catch (err: any) {
+              Alert.alert('error', err.message || 'failed to delete listing');
+            }
           },
         },
       ]
