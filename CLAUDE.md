@@ -104,6 +104,7 @@
 | conversations | user-pair based (not listing based) | one conversation per user pair, supports multiple listings (listingIds[]), initialListingId tracks conversation starter |
 | transactions | immutable firestore collection | snapshots listing data at sale time, tracks purchase/sales history |
 | floating labels | react-native-paper TextInput mode="outlined" | Input component supports `floatingLabel` prop for Pinterest-style labels |
+| firebase CLI deployment | firebase.json + .firebaserc at project root | required for `firebase deploy` commands; .firebaserc specifies project ID, firebase.json specifies rules/indexes paths |
 
 ### key patterns
 
@@ -194,6 +195,10 @@
 | migration script failures | (2026-02-11) always make migration scripts idempotent (check if already migrated, skip if so); handle null/empty values with defaults |
 | listing status enum change | (2026-02-11) changing status values requires data migration for existing docs; 'active'→'available', 'deleted'→'archived' |
 | atomic transaction creation | (2026-02-11) markAsSold must use batch write (transaction doc + listing update) to ensure data consistency |
+| single-field firestore indexes | (2026-02-11) firestore automatically handles single-field indexes; only create composite indexes (2+ fields) in firestore.indexes.json |
+| firebase CLI setup | (2026-02-11) firebase deploy requires firebase.json + .firebaserc files at project root; firebase CLI installed via `npm install -g firebase-tools` in WSL |
+| Button component flexibility | (2026-02-11) common components should accept optional `style` prop (ViewStyle) for layout flexibility without duplicating component logic |
+| silent form validation failures | (2026-02-11) add explicit Alert.alert() for validation failures during debugging; silent returns make issues hard to diagnose |
 
 ---
 
@@ -225,16 +230,14 @@
 - search functionality, precise location/maps, in-app payments, price editing notifications
 
 ### next steps
-1. **data migration** - update existing listings from status='active'→'available' in firestore
-2. **firebase deployment:**
-   - deploy firestore security rules (transactions collection + updated listings rules)
-   - deploy composite indexes (transactions by buyer/seller, archived listings)
+1. **debug listing creation** - listings aren't appearing in firestore after create button pressed; validation passes but write may be failing
+2. **run seed data script** - populate test data with transactions (seed.ts ready, needs user UIDs updated)
 3. **device testing:**
+   - listing creation flow (create → confirm screen → appears in feed/profile)
    - transaction flow: mark as sold → buyer selection → success screen
    - archived listings: archive → unarchive flow
    - purchase/sales history screens
    - sold badge display on listings
-4. run seed data script with test transactions (3 sample transactions included)
 
 ---
 
@@ -319,10 +322,11 @@
 - **test data:** seed.ts updated with 3 sample transactions
 - **implementation:** 19/19 tasks complete from transaction plan
 
-### current status
+### current status (session 4 - 2026-02-11)
 - **working:** auth, all screens wired to firebase, transaction flow fully implemented
-- **needs deployment:** firestore security rules + composite indexes (transaction indexes, archived listings index)
-- **needs data migration:** existing listings have status='active', need update to 'available'
-- **needs device testing:** transaction flow (mark as sold, buyer selection, success screen), archived listings (archive/unarchive), purchase/sales history, sold badges
+- **deployed:** firestore.rules (transactions + listings), firestore.indexes.json (8 composite indexes - removed unnecessary single-field messages index)
+- **debugging:** listing creation not persisting to firestore (validation passes, no errors, but listings don't appear in console or profile)
+- **created:** firebase.json + .firebaserc for firebase CLI deployment, Button component updated with style prop
+- **needs testing:** listing creation flow, transaction flow, archived listings, purchase/sales history
 - **deferred:** firebase storage (paid plan), phone auth (needs native modules), push notifications
 - **mock data files preserved** in src/services/mock/ for reference (still references `Board` type -- not updated)

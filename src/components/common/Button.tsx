@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle } from 'react-native';
 import { colors, spacing, borderRadius, typography } from '@constants/theme';
 
 interface ButtonProps {
@@ -8,6 +8,7 @@ interface ButtonProps {
   loading?: boolean;
   variant?: 'primary' | 'secondary' | 'outline';
   disabled?: boolean;
+  style?: ViewStyle;
 }
 
 export default function Button({
@@ -16,17 +17,29 @@ export default function Button({
   loading = false,
   variant = 'primary',
   disabled = false,
+  style,
 }: ButtonProps) {
   const getButtonStyle = () => {
-    if (disabled || loading) return [styles.button, styles.disabled];
-    switch (variant) {
-      case 'secondary':
-        return [styles.button, styles.secondary];
-      case 'outline':
-        return [styles.button, styles.outline];
-      default:
-        return styles.button;
+    const baseStyles = [styles.button];
+
+    if (disabled || loading) {
+      baseStyles.push(styles.disabled);
+    } else {
+      switch (variant) {
+        case 'secondary':
+          baseStyles.push(styles.secondary);
+          break;
+        case 'outline':
+          baseStyles.push(styles.outline);
+          break;
+      }
     }
+
+    if (style) {
+      baseStyles.push(style);
+    }
+
+    return baseStyles;
   };
 
   const getTextStyle = () => {

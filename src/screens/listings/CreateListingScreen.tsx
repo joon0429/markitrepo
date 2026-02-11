@@ -178,7 +178,26 @@ export default function CreateListingScreen() {
   };
 
   const handleCreate = async () => {
-    if (!validateForm() || !user?.uid || !userProfile?.username) {
+    console.log('handleCreate called');
+    console.log('user:', user?.uid);
+    console.log('userProfile:', userProfile);
+
+    const isFormValid = validateForm();
+    console.log('form valid:', isFormValid);
+    console.log('errors:', errors);
+
+    if (!isFormValid) {
+      Alert.alert('validation failed', 'please check all required fields');
+      return;
+    }
+
+    if (!user?.uid) {
+      Alert.alert('error', 'user not logged in');
+      return;
+    }
+
+    if (!userProfile?.username) {
+      Alert.alert('error', 'user profile not loaded');
       return;
     }
 
@@ -194,10 +213,19 @@ export default function CreateListingScreen() {
         visibility: isPrivate ? 'friends' : 'friends_plus',
       };
 
-      await createListing(user.uid, userProfile.username, input);
+      console.log('calling createListing with:', {
+        userId: user.uid,
+        username: userProfile.username,
+        input,
+      });
+
+      const listingId = await createListing(user.uid, userProfile.username, input);
+
+      console.log('listing created successfully! id:', listingId);
 
       navigation.replace('ListingConfirm');
     } catch (err: any) {
+      console.error('createListing error:', err);
       Alert.alert('error', err.message || 'failed to create listing');
     } finally {
       setCreating(false);
