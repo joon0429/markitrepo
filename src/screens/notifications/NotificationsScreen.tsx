@@ -11,11 +11,12 @@ export default function NotificationsScreen() {
   return (
     <View style={styles.container}>
       {/* filter tags - horizontal scroll */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filtersContainer}
-      >
+      <View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filtersContainer}
+        >
         {FILTER_TAGS.map((tag) => (
           <TouchableOpacity
             key={tag}
@@ -27,7 +28,8 @@ export default function NotificationsScreen() {
             </Text>
           </TouchableOpacity>
         ))}
-      </ScrollView>
+        </ScrollView>
+      </View>
 
       {/* empty state */}
       <View style={styles.content}>

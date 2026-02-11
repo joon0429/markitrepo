@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
@@ -74,22 +74,27 @@ function FeedStackNavigator() {
       <FeedStack.Screen
         name="Conversations"
         component={ConversationsScreen}
-        options={{
+        options={({ navigation }) => ({
           title: 'messages',
           headerRight: () => (
             <TouchableOpacity
               style={headerButtonStyles.messageButton}
-              onPress={() => Alert.alert('coming soon', 'start new conversation')}
+              onPress={() => navigation.navigate('ComingSoon', { title: 'new message', description: 'start new conversations from here' })}
             >
               <Ionicons name="add-outline" size={24} color={colors.text} />
             </TouchableOpacity>
           ),
-        }}
+        })}
       />
       <FeedStack.Screen
         name="Chat"
         component={ChatScreen}
         options={{ title: '' }}
+      />
+      <FeedStack.Screen
+        name="ComingSoon"
+        component={SettingsPlaceholderScreen}
+        options={({ route }) => ({ title: (route.params as any)?.title || 'coming soon' })}
       />
     </FeedStack.Navigator>
   );
@@ -116,22 +121,27 @@ function NotificationsStackNavigator() {
       <NotificationsStack.Screen
         name="Conversations"
         component={ConversationsScreen}
-        options={{
+        options={({ navigation }) => ({
           title: 'messages',
           headerRight: () => (
             <TouchableOpacity
               style={headerButtonStyles.messageButton}
-              onPress={() => Alert.alert('coming soon', 'start new conversation')}
+              onPress={() => navigation.navigate('ComingSoon', { title: 'new message', description: 'start new conversations from here' })}
             >
               <Ionicons name="add-outline" size={24} color={colors.text} />
             </TouchableOpacity>
           ),
-        }}
+        })}
       />
       <NotificationsStack.Screen
         name="Chat"
         component={ChatScreen}
         options={{ title: '' }}
+      />
+      <NotificationsStack.Screen
+        name="ComingSoon"
+        component={SettingsPlaceholderScreen}
+        options={({ route }) => ({ title: (route.params as any)?.title || 'coming soon' })}
       />
     </NotificationsStack.Navigator>
   );

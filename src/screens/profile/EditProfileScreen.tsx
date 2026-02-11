@@ -76,9 +76,7 @@ export default function EditProfileScreen() {
         bio: bio.trim(),
       });
 
-      Alert.alert('success', 'profile updated!', [
-        { text: 'ok', onPress: () => navigation.goBack() },
-      ]);
+      navigation.goBack();
     } catch (err: any) {
       Alert.alert('error', err.message || 'failed to update profile');
     } finally {

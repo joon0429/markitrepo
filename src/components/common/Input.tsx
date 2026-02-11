@@ -7,9 +7,10 @@ interface InputProps extends TextInputProps {
   label?: string;
   error?: string;
   floatingLabel?: boolean;
+  left?: React.ReactNode;
 }
 
-export default function Input({ label, error, style, floatingLabel, ...props }: InputProps) {
+export default function Input({ label, error, style, floatingLabel, left, ...props }: InputProps) {
   if (floatingLabel && label) {
     return (
       <View style={styles.container}>
@@ -24,6 +25,7 @@ export default function Input({ label, error, style, floatingLabel, ...props }: 
           keyboardType={props.keyboardType}
           autoCapitalize={props.autoCapitalize}
           error={!!error}
+          left={left}
           style={[styles.paperInput, props.multiline && styles.paperInputMultiline, style]}
           outlineColor={colors.border}
           activeOutlineColor={colors.primary}

@@ -8,6 +8,7 @@ export type RootStackParamList = {
   Auth: NavigatorScreenParams<AuthStackParamList>;
   Main: NavigatorScreenParams<MainTabParamList>;
   CreateListing: undefined; // modal presentation
+  ListingConfirm: undefined;
 };
 
 // auth stack
@@ -30,6 +31,7 @@ export type FeedStackParamList = {
   ListingDetail: { listing: SerializableListing };
   Conversations: undefined;
   Chat: { conversationId: string; conversation: SerializableConversation };
+  ComingSoon: { title: string; description?: string };
 };
 
 // notifications stack
@@ -37,6 +39,7 @@ export type NotificationsStackParamList = {
   Notifications: undefined;
   Conversations: undefined;
   Chat: { conversationId: string; conversation: SerializableConversation };
+  ComingSoon: { title: string; description?: string };
 };
 
 // map stack

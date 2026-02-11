@@ -94,6 +94,7 @@ export default function FeedScreen() {
           fontSize: typography.fontSize.sm,
           fontWeight: typography.fontWeight.bold,
           textTransform: 'none',
+          color: colors.text,
         },
       }}
     >

@@ -12,6 +12,9 @@ import {
   Switch,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '@navigation/types';
+import { TextInput as PaperTextInput } from 'react-native-paper';
 import Button from '@components/common/Button';
 import Input from '@components/common/Input';
 import Dropdown from '@components/common/Dropdown';
@@ -26,7 +29,7 @@ interface PhotoSlot {
 }
 
 export default function CreateListingScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { user, userProfile } = useAuth();
   const [creating, setCreating] = useState(false);
 
@@ -105,22 +108,29 @@ export default function CreateListingScreen() {
   };
 
   const handlePriceChange = (text: string) => {
-    // remove non-numeric characters except decimal point
-    const cleaned = text.replace(/[^0-9.]/g, '');
-    // ensure only one decimal point
-    const parts = cleaned.split('.');
-    if (parts.length > 2) {
-      setPrice(parts[0] + '.' + parts.slice(1).join(''));
-    } else {
-      setPrice(cleaned);
+    // strip everything except digits and decimal point
+    let cleaned = text.replace(/[^0-9.]/g, '');
+    // allow only one decimal point
+    const dotIndex = cleaned.indexOf('.');
+    if (dotIndex !== -1) {
+      cleaned = cleaned.slice(0, dotIndex + 1) + cleaned.slice(dotIndex + 1).replace(/\./g, '');
+      // limit to 2 decimal places
+      const decimals = cleaned.slice(dotIndex + 1);
+      if (decimals.length > 2) {
+        cleaned = cleaned.slice(0, dotIndex + 3);
+      }
     }
-  };
-
-  const formatPriceDisplay = (value: string): string => {
-    if (!value) return '';
-    const num = parseFloat(value);
-    if (isNaN(num)) return value;
-    return `$${num.toFixed(2)}`;
+    setPrice(cleaned);
+    // show inline error if over limit
+    const num = parseFloat(cleaned);
+    if (!isNaN(num) && num > 9999.99) {
+      setErrors(prev => ({ ...prev, price: 'price limit $10k' }));
+    } else {
+      setErrors(prev => {
+        const { price: _, ...rest } = prev;
+        return rest;
+      });
+    }
   };
 
   const getWordCount = (text: string): number => {
@@ -129,12 +139,6 @@ export default function CreateListingScreen() {
 
   const validateForm = (): boolean => {
     const newErrors: { [key: string]: string } = {};
-
-    // check if at least one photo
-    const hasPhoto = photos.some(photo => photo.uri);
-    if (!hasPhoto) {
-      newErrors.photos = 'at least one photo is required';
-    }
 
     // check title (max 50 characters)
     if (!title.trim()) {
@@ -192,16 +196,7 @@ export default function CreateListingScreen() {
 
       await createListing(user.uid, userProfile.username, input);
 
-      Alert.alert(
-        'success',
-        'listing created!',
-        [
-          {
-            text: 'ok',
-            onPress: () => navigation.goBack(),
-          },
-        ]
-      );
+      navigation.replace('ListingConfirm');
     } catch (err: any) {
       Alert.alert('error', err.message || 'failed to create listing');
     } finally {
@@ -226,7 +221,6 @@ export default function CreateListingScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             add photos ({photoCount}/4)
-            {errors.photos && <Text style={styles.errorInline}> - {errors.photos}</Text>}
           </Text>
           <ScrollView
             horizontal
@@ -274,7 +268,7 @@ export default function CreateListingScreen() {
             label="item name"
             value={title}
             onChangeText={handleTitleChange}
-            placeholder="add title..."
+            placeholder="add item name..."
             error={errors.title}
           />
           <Text style={styles.counterBelow}>{title.length}/{TITLE_LIMIT}</Text>
@@ -287,8 +281,9 @@ export default function CreateListingScreen() {
             label="price"
             value={price}
             onChangeText={handlePriceChange}
-            placeholder="$0.00"
-            keyboardType="number-pad"
+            placeholder="0.00"
+            keyboardType="decimal-pad"
+            left={<PaperTextInput.Affix text="$" />}
             error={errors.price}
           />
         </View>
@@ -300,7 +295,7 @@ export default function CreateListingScreen() {
             label="description"
             value={description}
             onChangeText={handleDescriptionChange}
-            placeholder="example: gray tommy hilfiger t-shirt, large, worn maybe 10 times?"
+            placeholder="add description (size, condition, and so on)"
             multiline
             numberOfLines={4}
             error={errors.description}
@@ -377,11 +372,6 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: spacing.sm,
-  },
-  errorInline: {
-    color: colors.error,
-    textTransform: 'none',
-    fontSize: typography.fontSize.xs,
   },
   photoRow: {
     marginHorizontal: -spacing.lg,

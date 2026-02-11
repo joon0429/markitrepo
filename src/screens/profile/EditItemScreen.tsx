@@ -254,7 +254,7 @@ function EditItemForm({ listing, navigation }: { listing: Listing; navigation: E
             label="item name"
             value={title}
             onChangeText={handleTitleChange}
-            placeholder="add title..."
+            placeholder="add item name..."
             error={errors.title}
           />
           <Text style={styles.counterBelow}>{title.length}/{TITLE_LIMIT}</Text>

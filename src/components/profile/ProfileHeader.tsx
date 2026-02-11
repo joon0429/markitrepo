@@ -36,9 +36,10 @@ export default function ProfileHeader({ user, stats, isOwnProfile, onAddFriend, 
         </View>
       </View>
 
-      {/* username and bio */}
+      {/* name, username, and bio */}
       <View style={styles.infoSection}>
-        <Text style={styles.username}>{user.displayName}</Text>
+        <Text style={styles.displayName}>{user.displayName}</Text>
+        <Text style={styles.username}>@{user.username}</Text>
         {user.bio && (
           <Text style={styles.bioText}>{user.bio}</Text>
         )}
@@ -92,10 +93,16 @@ const styles = StyleSheet.create({
   infoSection: {
     marginBottom: spacing.md,
   },
-  username: {
+  displayName: {
     fontSize: typography.fontSize.md,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.bold,
     color: colors.text,
+    marginBottom: 2,
+  },
+  username: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.regular,
+    color: colors.textSecondary,
     marginBottom: spacing.xs,
   },
   bioText: {

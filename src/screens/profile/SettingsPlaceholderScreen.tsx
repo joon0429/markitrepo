@@ -1,15 +1,14 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { useRoute, RouteProp } from '@react-navigation/native';
-import { ProfileStackParamList } from '@navigation/types';
+import { useRoute } from '@react-navigation/native';
 import EmptyState from '@components/common/EmptyState';
 import { colors } from '@constants/theme';
 
-type SettingsPlaceholderRouteProp = RouteProp<ProfileStackParamList, 'SettingsPlaceholder'>;
+type PlaceholderParams = { title: string; description?: string };
 
 export default function SettingsPlaceholderScreen() {
-  const route = useRoute<SettingsPlaceholderRouteProp>();
-  const { description } = route.params;
+  const route = useRoute();
+  const { description } = (route.params as PlaceholderParams) || {};
 
   return (
     <View style={styles.container}>

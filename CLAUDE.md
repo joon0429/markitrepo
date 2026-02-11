@@ -1,7 +1,7 @@
 # CLAUDE.md - project context & design system
 
 > this file is automatically read by claude code at the start of every conversation.
-> last updated: 2026-02-10 (session 2)
+> last updated: 2026-02-11 (session 4)
 
 ---
 
@@ -49,13 +49,20 @@
 - **dropdown selectors:** modal overlay with option list for structured inputs (closets)
 - **header separator:** subtle border line (#2C2C2C) below all screen headers via defaultScreenOptions
 - **settings access:** hamburger menu icon (menu-outline) in profile header top-right -> settings page
-- **edit profile:** instagram-style edit screen (name, username, bio, profile picture placeholder)
+- **edit profile:** instagram-style edit screen (name, username, bio, profile picture placeholder); save navigates back immediately (no alert)
+- **profile header layout:** name (bold) / @username (gray) / bio -- left-aligned vertical stack
+- **listing confirmation:** after creating a listing, navigate to a confirm screen with "return to home" button (no alert)
+- **"coming soon" screens:** reuse SettingsPlaceholderScreen for placeholder routes across all stacks (not just profile)
 - **search:** instant filtering (no debounce) for small datasets like friends list
 - **unread indicators:** primary-colored dot + bold text for unread conversations/messages
 - **message bubbles:** primary color (right-aligned) for own messages, surface color (left-aligned) for others
 - **listing detail:** share button (top right), simplified seller info, mark count badge, bottom action buttons (mark it + send message)
 - **messages access:** envelope icon in feed header navigates to conversations
 - **privacy toggle:** native switch component instead of button groups
+- **conversations:** facebook marketplace style - one conversation per user pair (not per listing), supports multiple listings per conversation, "other marks" button shows all discussed items
+- **closet management:** structured firestore collection with case-insensitive matching ("Shoes" = "shoes" = " shoes "), dropdown shows existing closets + create new option
+- **transaction flow:** seller marks item as sold → modal with buyer selector (from markedBy list) → creates immutable transaction record
+- **archived listings:** instagram-style archive section, archived items don't appear in feed or closet counts
 
 ### visual design
 
@@ -91,7 +98,9 @@
 | payments | external (Venmo/Cash App) | no in-app payment for MVP |
 | firebase storage | DEFERRED (requires paid plan) | all photo fields use 'placeholder' strings for now |
 | auth method | email/password now, phone auth later | phone auth needs native modules (won't work in Expo Go) |
-| closets | computed client-side from listing.closet field | no closets collection in firestore; useProfile groups by closet name |
+| closets | firestore collection with denormalized stats | structured closets with normalized names (case-insensitive), itemCount/previewPhotos updated via batch writes |
+| conversations | user-pair based (not listing based) | one conversation per user pair, supports multiple listings (listingIds[]), initialListingId tracks conversation starter |
+| transactions | immutable firestore collection | snapshots listing data at sale time, tracks purchase/sales history |
 | floating labels | react-native-paper TextInput mode="outlined" | Input component supports `floatingLabel` prop for Pinterest-style labels |
 
 ### key patterns
@@ -99,12 +108,17 @@
 - **navigation params:** use serializable versions with ISO strings (React Navigation can't handle Timestamp objects)
 - **component organization:** feature folders (profile/, friends/, messages/)
 - **form input limits:** title 50 chars, description 50 words, price max $9,999.99; counters shown BELOW input boxes
-- **create listing:** modal presentation at root level (not in tab navigator)
-- **closet selection:** dropdown with preset options (unnamed, clothes, shoes, furniture + "add more...")
+- **price input:** $ prefix via PaperTextInput.Affix, decimal-pad keyboard, 2 decimal places max, inline error (not capped) if over limit
+- **create listing flow:** modal presentation at root level -> on success, navigation.replace to ListingConfirm screen -> "return to home" resets to Main
+- **closet selection:** dropdown shows existing closets (from firestore) + "create new" option; normalized matching (trim + lowercase)
 - **closet management flow:** profile -> closet detail -> edit item (no multi-select)
+- **closet normalization:** always `name.trim().toLowerCase()` for matching; displayName preserves user casing
 - **firestore 'in' query batching:** batch friendIds into groups of 30 for getFeedListings
 - **real-time chat:** useChat subscribes via onSnapshot; other screens use one-time getDocs
-- **conversation deduplication:** findConversation checks before creating new one
+- **conversation deduplication:** findConversation(userId1, userId2) - one conversation per user pair, multiple listings supported via listingIds[]
+- **conversation listing management:** add to listingIds[] when user clicks "send message"; remove when unmarking (keep in sync)
+- **batch writes for denormalization:** closet stats (itemCount, previewPhotos), listing updates, transaction creation all use atomic batch operations
+- **migration scripts:** must be idempotent (skip already-migrated data); handle edge cases (null/empty values, duplicates)
 - **headers:** all via navigator screenOptions with shared defaultScreenOptions (never custom in-screen)
 
 ### firebase service layer
@@ -113,17 +127,21 @@
 |-------------|---------------|
 | `src/services/firebase/config.ts` | firebase init (auth + firestore), reads from app.config.js extra |
 | `src/services/firebase/userService.ts` | user CRUD (createUserProfile, getUserProfile, updateUserProfile) |
-| `src/services/firebase/listingService.ts` | listing CRUD + mark/unmark + feed queries with batching |
+| `src/services/firebase/listingService.ts` | listing CRUD + mark/unmark + feed queries with batching + archive/unarchive |
+| `src/services/firebase/closetService.ts` | closet CRUD (getOrCreateCloset, rename with batch updates, stats management) |
+| `src/services/firebase/transactionService.ts` | transaction creation (atomic with listing update), purchase/sales history queries |
 | `src/services/firebase/friendService.ts` | friends + requests + search (atomic accept with batch writes) |
-| `src/services/firebase/messageService.ts` | conversations + real-time messages + unread tracking |
+| `src/services/firebase/messageService.ts` | conversations (user-pair deduplication, multi-listing support) + real-time messages + unread tracking |
 
 ### custom hooks
 
 | hook | screen concern |
 |------|---------------|
-| `useProfile` | profile + computed closets/stats from listings |
-| `useListings` | feed data by visibility using friendIds |
-| `useListingDetail` | mark/unmark with optimistic UI |
+| `useProfile` | profile + stats (includes purchaseCount from transactions) |
+| `useClosets` | fetch user's closets from firestore collection |
+| `useListings` | feed data by visibility using friendIds, filters sold/archived |
+| `useListingDetail` | mark/unmark with optimistic UI + markAsSold + archive functions |
+| `useTransactions` | purchase or sales history from transactions collection |
 | `useFriends` | friends + requests + accept/decline/send/search |
 | `useConversations` | conversation list sorted by updatedAt |
 | `useChat` | real-time messages via onSnapshot, auto-marks as read |
@@ -160,6 +178,16 @@
 | "board" terminology in code | renamed to "closet" everywhere -- types, components, screens, hooks, nav routes; firestore `closet` field unchanged |
 | form counters above input boxes | counters (char count, word count) go BELOW input boxes, not in a header row above |
 | tab underline indicator on dark bg | remove indicator entirely for BeReal-style tabs; use color contrast only (white active, gray inactive) |
+| material-top-tabs label color not visible | add explicit `color` in `tabBarLabelStyle` -- tint color props alone may not apply on all platforms |
+| price input capping user value silently | never silently change user input; show inline error instead and let the user correct it |
+| ScrollView stretching in flex container | wrap horizontal ScrollView in a plain View to prevent it from expanding to fill flex parent |
+| success alerts before navigation | skip success alerts for simple actions (edit profile save, listing create); navigate directly or to a confirm screen |
+| SettingsPlaceholderScreen typed to one stack | use generic route typing (`route.params as PlaceholderParams`) so it can be reused across any stack |
+| closet name variations | (2026-02-11) always normalize with `trim().toLowerCase()` for matching; "Shoes" = "shoes" = " shoes " map to same closet |
+| denormalized closet stats | (2026-02-11) update itemCount and previewPhotos via batch writes; only count listings with status='active' (exclude sold/archived) |
+| empty closets | (2026-02-11) empty closets persist in firestore (itemCount=0, previewPhotos=[]); don't auto-delete when all items removed |
+| conversation per listing | (2026-02-11) WRONG - use one conversation per user pair (not per listing); support multiple listings via listingIds[] array |
+| migration script failures | (2026-02-11) always make migration scripts idempotent (check if already migrated, skip if so); handle null/empty values with defaults |
 
 ---
 
@@ -191,11 +219,16 @@
 - search functionality, precise location/maps, in-app payments, price editing notifications
 
 ### next steps
-1. test all screens on device
-2. deploy firestore security rules (firebase console or CLI)
-3. create composite indexes (firebase console or deploy firestore.indexes.json)
-4. run seed data script (requires pasting test account UIDs)
-5. push notifications (FCM integration -- post-MVP if needed)
+1. **backend implementation (IN PROGRESS)** - 45 tasks across 9 phases:
+   - phase 1: type definitions (closet, transaction, update listing/conversation/profile types)
+   - phase 2-5: services (closetService, transactionService, update listing/message services)
+   - phase 6: hooks (useClosets, useTransactions, update existing hooks)
+   - phase 7-8: ui (ClosetDropdown, transaction screens, archived listings, conversation updates)
+   - phase 9: firebase config + migration scripts
+2. run migration scripts (convert existing listings to closets, update conversation schema)
+3. deploy firestore security rules + indexes (closets, transactions)
+4. test all new features on device
+5. run seed data script with test closets/transactions
 
 ---
 
@@ -247,10 +280,21 @@
 - feed tabs restyled to BeReal pattern (no underline, "my friends" / "friends+")
 - notifications dummy data removed, filter tag sizing tightened
 - conversations header now has + icon (placeholder for new message flow)
-- create/edit listing forms use floating labels (react-native-paper TextInput), counters below inputs, number-pad for price, $9,999.99 max
+- create/edit listing forms use floating labels (react-native-paper TextInput), counters below inputs, decimal-pad for price with $ prefix, $9,999.99 max
 - settings page created (instagram-style list, functional log out)
 - edit profile page created (name, username, bio; username uniqueness check)
 - hamburger menu icon added to profile header
+
+### phase 9: UI spot fixes (2026-02-10, session 3)
+- feed tab label color fixed (explicit color in tabBarLabelStyle)
+- messages "+" button now navigates to "coming soon" screen (reuses SettingsPlaceholderScreen)
+- photo validation removed from create listing (upload not functional yet)
+- price input: $ prefix via PaperTextInput.Affix, decimal-pad keyboard, 2-decimal limit, inline error if over $9,999.99
+- edit profile save navigates back immediately (no success alert)
+- profile header now shows name (bold) / @username (gray) / bio in left-aligned stack
+- listing confirmation screen added (ListingConfirmScreen) -- replaces success alert after create
+- notifications filter tags fixed (wrapped ScrollView to prevent vertical stretching)
+- Input component supports `left` prop for PaperTextInput affixes
 
 ### current status
 - **working:** auth, all screens wired to firebase
@@ -258,14 +302,27 @@
 - **deferred:** firebase storage (paid plan), phone auth (needs native modules), push notifications
 - **mock data files preserved** in src/services/mock/ for reference (still references `Board` type -- not updated)
 
-### needs device testing (phase 8 changes)
-- header separator visibility on all screens
-- feed tab styling (no underline, correct empty state messages per tab)
-- notifications empty state with tighter filter tags
-- conversations + icon and "coming soon" alert
-- floating label inputs on create listing and edit item screens
-- number-pad keyboard for price input
-- price max validation ($9,999.99)
-- settings page navigation and log out flow
-- edit profile form (save, username uniqueness check)
-- closet rename throughout (profile grid, closet detail, navigation)
+### phase 10: backend implementation planning (2026-02-11, session 4)
+- comprehensive schema review: documented all 8 existing entities + relationships
+- designed new schema: closets collection (structured, normalized names), transactions collection (immutable history)
+- updated existing schema: listings (add closetId, buyerId, soldAt, archivedAt, 'archived' status), conversations (multi-listing support with listingIds[], initialListingId)
+- implementation plan: 45 tasks across 9 phases (types, services, hooks, ui, config, migration)
+- key decisions: closet normalization (case-insensitive), user-pair conversations, denormalized stats via batch writes
+- plan saved: .claude/plans/twinkly-jumping-lagoon.md
+
+### current status
+- **working:** auth, all screens wired to firebase
+- **in progress:** backend implementation (closets, conversations, transactions) - 45 tasks queued
+- **not deployed:** firestore security rules, composite indexes
+- **deferred:** firebase storage (paid plan), phone auth (needs native modules), push notifications
+- **mock data files preserved** in src/services/mock/ for reference (still references `Board` type -- not updated)
+
+### needs device testing (session 3 changes)
+- feed tab labels visible on dark background
+- messages "+" -> coming soon screen navigation
+- create listing without photos (no validation error)
+- price input: $ prefix, 2 decimal limit, inline error over $9,999.99
+- create listing -> confirm screen -> return to home flow
+- edit profile save -> immediate navigate back
+- profile header: name (bold) / @username / bio layout
+- notifications filter tags not stretched
