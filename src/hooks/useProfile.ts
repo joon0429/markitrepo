@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@contexts/AuthContext';
 import { getUserListings } from '@services/firebase/listingService';
 import { getUserProfile, updateUserProfile } from '@services/firebase/userService';
-import { User, Listing, UpdateUserInput, Closet, UserStats } from '@types';
+import { getUserPurchases, getUserSales } from '@services/firebase/transactionService';
+import { User, Listing, UpdateUserInput, Closet, UserStats, Transaction } from '@types';
 
 export function useProfile(userId?: string) {
   const { user, userProfile: authProfile } = useAuth();
@@ -12,6 +13,8 @@ export function useProfile(userId?: string) {
     !userId ? authProfile : null
   );
   const [listings, setListings] = useState<Listing[]>([]);
+  const [purchases, setPurchases] = useState<Transaction[]>([]);
+  const [sales, setSales] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,9 +35,16 @@ export function useProfile(userId?: string) {
         setProfile(p);
       }
 
-      // fetch user's listings
-      const userListings = await getUserListings(targetUserId);
+      // fetch user's listings and transactions
+      const [userListings, userPurchases, userSales] = await Promise.all([
+        getUserListings(targetUserId),
+        getUserPurchases(targetUserId),
+        getUserSales(targetUserId),
+      ]);
+
       setListings(userListings);
+      setPurchases(userPurchases);
+      setSales(userSales);
     } catch (err: any) {
       setError(err.message || 'failed to load profile');
     } finally {
@@ -53,7 +63,8 @@ export function useProfile(userId?: string) {
   const stats: UserStats = {
     listingCount: listings.length,
     friendCount: profile?.friendIds?.length || 0,
-    salesCount: listings.filter(l => l.status === 'sold').length,
+    purchaseCount: purchases.length,
+    salesCount: sales.length,
   };
 
   const update = async (data: UpdateUserInput) => {

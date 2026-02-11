@@ -13,6 +13,8 @@ interface SettingsRow {
   label: string;
   description?: string;
   isLogout?: boolean;
+  route?: 'ArchivedListings' | 'TransactionHistory';
+  routeParams?: any;
 }
 
 const SETTINGS_ROWS: SettingsRow[] = [
@@ -32,6 +34,20 @@ const SETTINGS_ROWS: SettingsRow[] = [
   },
   {
     label: 'privacy and data management',
+  },
+  {
+    label: 'archived listings',
+    route: 'ArchivedListings',
+  },
+  {
+    label: 'purchase history',
+    route: 'TransactionHistory',
+    routeParams: { type: 'purchases' },
+  },
+  {
+    label: 'sales history',
+    route: 'TransactionHistory',
+    routeParams: { type: 'sales' },
   },
   {
     label: 'terms of service',
@@ -69,6 +85,11 @@ export default function SettingsScreen() {
           },
         ]
       );
+      return;
+    }
+
+    if (row.route) {
+      navigation.navigate(row.route as any, row.routeParams);
       return;
     }
 

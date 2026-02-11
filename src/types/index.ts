@@ -19,6 +19,10 @@ export type { Friend, FriendRequest, FriendRequestStatus, FriendRequestWithMutua
 export type { Message, Conversation, SerializableMessage, SerializableConversation } from './message';
 export { serializeMessage, deserializeMessage, serializeConversation, deserializeConversation } from './message';
 
+// Transaction types
+export type { Transaction, SerializableTransaction } from './transaction';
+export { serializeTransaction, deserializeTransaction } from './transaction';
+
 // Notification types
 export type { Notification, NotificationType } from './notification';
 

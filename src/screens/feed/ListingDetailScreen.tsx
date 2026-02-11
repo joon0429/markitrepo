@@ -1,16 +1,17 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Share } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Share, Modal, FlatList } from 'react-native';
 import { useRoute, RouteProp, useNavigation, CompositeNavigationProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { FeedStackParamList, MainTabParamList } from '@navigation/types';
+import { FeedStackParamList, MainTabParamList, RootStackParamList } from '@navigation/types';
 import { Ionicons } from '@expo/vector-icons';
 import PhotoCarousel from '@components/listings/PhotoCarousel';
 import Avatar from '@components/common/Avatar';
 import { useListingDetail } from '@hooks/useListingDetail';
 import { useAuth } from '@contexts/AuthContext';
 import { createConversation } from '@services/firebase/messageService';
-import { serializeConversation, Conversation } from '@types';
+import { getUserProfile } from '@services/firebase/userService';
+import { serializeConversation, Conversation, User } from '@types';
 import { Timestamp } from 'firebase/firestore';
 import { colors, spacing, typography } from '@constants/theme';
 
@@ -27,7 +28,17 @@ export default function ListingDetailScreen() {
   const { listing } = route.params;
 
   const { user, userProfile } = useAuth();
-  const { isMarked, markCount, toggleMark, doubleTapMark } = useListingDetail(listing);
+  const { isMarked, markCount, toggleMark, doubleTapMark, markAsSold, archive } = useListingDetail(listing);
+
+  const [showBuyerModal, setShowBuyerModal] = useState(false);
+  const [markedByUsers, setMarkedByUsers] = useState<User[]>([]);
+  const [loadingBuyers, setLoadingBuyers] = useState(false);
+
+  const isSeller = user?.uid === listing.sellerId;
+  const isSold = listing.status === 'sold';
+  const isArchived = listing.status === 'archived';
+  const canMarkAsSold = isSeller && listing.status === 'available' && listing.markedBy.length > 0;
+  const canArchive = isSeller && listing.status === 'available';
 
   const handleMark = () => {
     toggleMark();
@@ -101,6 +112,55 @@ export default function ListingDetailScreen() {
     }
   };
 
+  const handleShowBuyerModal = async () => {
+    setLoadingBuyers(true);
+    setShowBuyerModal(true);
+    try {
+      // Fetch user profiles for all who marked
+      const users = await Promise.all(
+        listing.markedBy.map((userId) => getUserProfile(userId))
+      );
+      setMarkedByUsers(users.filter((u): u is User => u !== null));
+    } catch (err) {
+      Alert.alert('error', 'failed to load buyers');
+    } finally {
+      setLoadingBuyers(false);
+    }
+  };
+
+  const handleSelectBuyer = async (buyerId: string) => {
+    try {
+      setShowBuyerModal(false);
+      const transactionId = await markAsSold(buyerId);
+      // Navigate to transaction success screen
+      (navigation as any).navigate('TransactionSuccess', { transactionId });
+    } catch (err: any) {
+      Alert.alert('error', err.message || 'failed to mark as sold');
+    }
+  };
+
+  const handleArchive = async () => {
+    Alert.alert(
+      'archive listing',
+      'are you sure you want to archive this listing? it will be hidden from your profile.',
+      [
+        { text: 'cancel', style: 'cancel' },
+        {
+          text: 'archive',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await archive();
+              navigation.goBack();
+            } catch (err: any) {
+              Alert.alert('error', err.message || 'failed to archive');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={true}>
@@ -110,7 +170,14 @@ export default function ListingDetailScreen() {
         <View style={styles.content}>
           {/* title with share button */}
           <View style={styles.titleRow}>
-            <Text style={styles.title}>{listing.title}</Text>
+            <View style={styles.titleContainer}>
+              <Text style={styles.title}>{listing.title}</Text>
+              {isSold && (
+                <View style={styles.soldBadge}>
+                  <Text style={styles.soldBadgeText}>sold</Text>
+                </View>
+              )}
+            </View>
             <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
               <Ionicons name="share-outline" size={22} color={colors.text} />
             </TouchableOpacity>
@@ -139,32 +206,116 @@ export default function ListingDetailScreen() {
           {/* description */}
           <Text style={styles.description}>{listing.description}</Text>
 
+          {/* seller actions */}
+          {isSeller && listing.status === 'available' && (
+            <View style={styles.sellerActions}>
+              {canMarkAsSold && (
+                <TouchableOpacity
+                  style={styles.sellerActionButton}
+                  onPress={handleShowBuyerModal}
+                >
+                  <Ionicons name="checkmark-circle-outline" size={20} color={colors.primary} />
+                  <Text style={styles.sellerActionText}>mark as sold</Text>
+                </TouchableOpacity>
+              )}
+              {canArchive && (
+                <TouchableOpacity
+                  style={styles.sellerActionButton}
+                  onPress={handleArchive}
+                >
+                  <Ionicons name="archive-outline" size={20} color={colors.textSecondary} />
+                  <Text style={styles.sellerActionText}>archive</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+
           <View style={styles.bottomSpacer} />
         </View>
       </ScrollView>
 
       {/* bottom action buttons */}
-      <View style={styles.actionButtons}>
-        <TouchableOpacity
-          style={[styles.markButton, isMarked && styles.markButtonActive]}
-          onPress={handleMark}
-          activeOpacity={0.8}
-        >
-          <Ionicons name={isMarked ? 'bookmark' : 'bookmark-outline'} size={18} color={isMarked ? colors.text : '#FFFFFF'} />
-          <Text style={[styles.markButtonText, isMarked && styles.markButtonTextActive]}>
-            {isMarked ? 'marked' : 'mark it'}
-          </Text>
-        </TouchableOpacity>
+      {!isSeller && (
+        <View style={styles.actionButtons}>
+          <TouchableOpacity
+            style={[
+              styles.markButton,
+              isMarked && styles.markButtonActive,
+              (isSold || isArchived) && styles.markButtonDisabled,
+            ]}
+            onPress={handleMark}
+            activeOpacity={0.8}
+            disabled={isSold || isArchived}
+          >
+            <Ionicons
+              name={isMarked ? 'bookmark' : 'bookmark-outline'}
+              size={18}
+              color={isSold || isArchived ? colors.textSecondary : isMarked ? colors.text : '#FFFFFF'}
+            />
+            <Text
+              style={[
+                styles.markButtonText,
+                isMarked && styles.markButtonTextActive,
+                (isSold || isArchived) && styles.markButtonTextDisabled,
+              ]}
+            >
+              {isSold ? 'sold' : isMarked ? 'marked' : 'mark it'}
+            </Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.messageButton}
-          onPress={handleMessageSeller}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.messageButtonText}>send message</Text>
-          <Ionicons name="send-outline" size={16} color={colors.text} />
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={styles.messageButton}
+            onPress={handleMessageSeller}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.messageButtonText}>send message</Text>
+            <Ionicons name="send-outline" size={16} color={colors.text} />
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* buyer selection modal */}
+      <Modal
+        visible={showBuyerModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowBuyerModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>select buyer</Text>
+              <TouchableOpacity onPress={() => setShowBuyerModal(false)}>
+                <Ionicons name="close" size={24} color={colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            {loadingBuyers ? (
+              <Text style={styles.modalLoading}>loading...</Text>
+            ) : (
+              <FlatList
+                data={markedByUsers}
+                keyExtractor={(item) => item.uid}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.buyerItem}
+                    onPress={() => handleSelectBuyer(item.uid)}
+                  >
+                    <Avatar uri={item.photoURL} size={40} username={item.username} />
+                    <View style={styles.buyerInfo}>
+                      <Text style={styles.buyerUsername}>@{item.username}</Text>
+                      {item.displayName && (
+                        <Text style={styles.buyerDisplayName}>{item.displayName}</Text>
+                      )}
+                    </View>
+                    <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+                  </TouchableOpacity>
+                )}
+              />
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -183,11 +334,27 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: spacing.md,
   },
-  title: {
+  titleContainer: {
     flex: 1,
+    gap: spacing.xs,
+  },
+  title: {
     fontSize: typography.fontSize.xxl,
     fontWeight: typography.fontWeight.bold,
     color: colors.text,
+  },
+  soldBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    backgroundColor: colors.primary,
+    borderRadius: 4,
+  },
+  soldBadgeText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    color: '#FFFFFF',
+    textTransform: 'uppercase',
   },
   shareButton: {
     padding: spacing.sm,
@@ -219,6 +386,25 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.md,
     color: colors.text,
     lineHeight: typography.fontSize.md * 1.6,
+  },
+  sellerActions: {
+    marginTop: spacing.xl,
+    gap: spacing.md,
+  },
+  sellerActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    padding: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  sellerActionText: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text,
   },
   bottomSpacer: {
     height: 100,
@@ -254,6 +440,13 @@ const styles = StyleSheet.create({
   markButtonTextActive: {
     color: colors.text,
   },
+  markButtonDisabled: {
+    backgroundColor: colors.surface,
+    opacity: 0.6,
+  },
+  markButtonTextDisabled: {
+    color: colors.textSecondary,
+  },
   messageButton: {
     flex: 1,
     flexDirection: 'row',
@@ -270,5 +463,54 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.md,
     fontWeight: typography.fontWeight.semibold,
     color: colors.text,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    maxHeight: '70%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  modalTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text,
+  },
+  modalLoading: {
+    padding: spacing.xl,
+    textAlign: 'center',
+    color: colors.textSecondary,
+  },
+  buyerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.lg,
+    gap: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  buyerInfo: {
+    flex: 1,
+  },
+  buyerUsername: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text,
+  },
+  buyerDisplayName: {
+    fontSize: typography.fontSize.sm,
+    color: colors.textSecondary,
   },
 });

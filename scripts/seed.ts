@@ -126,7 +126,7 @@ const listings = [
     category: 'streetwear',
     visibility: 'friends_plus',
     markedBy: [] as string[],
-    status: 'active',
+    status: 'available',
   },
   {
     id: 'seed-listing-2',
@@ -140,7 +140,7 @@ const listings = [
     category: 'sneakers',
     visibility: 'friends',
     markedBy: [USER_UIDS.user2],
-    status: 'active',
+    status: 'available',
   },
   {
     id: 'seed-listing-3',
@@ -154,7 +154,7 @@ const listings = [
     category: 'outerwear',
     visibility: 'friends',
     markedBy: [] as string[],
-    status: 'active',
+    status: 'available',
   },
   {
     id: 'seed-listing-4',
@@ -168,7 +168,7 @@ const listings = [
     category: 'tech',
     visibility: 'friends',
     markedBy: [USER_UIDS.user1],
-    status: 'active',
+    status: 'available',
   },
   {
     id: 'seed-listing-5',
@@ -182,7 +182,7 @@ const listings = [
     category: 'gaming',
     visibility: 'friends',
     markedBy: [] as string[],
-    status: 'active',
+    status: 'available',
   },
   {
     id: 'seed-listing-6',
@@ -196,7 +196,7 @@ const listings = [
     category: 'pc gear',
     visibility: 'friends_plus',
     markedBy: [USER_UIDS.user3],
-    status: 'active',
+    status: 'available',
   },
   {
     id: 'seed-listing-7',
@@ -210,7 +210,7 @@ const listings = [
     category: 'plants',
     visibility: 'friends',
     markedBy: [USER_UIDS.user1, USER_UIDS.user2],
-    status: 'active',
+    status: 'available',
   },
   {
     id: 'seed-listing-8',
@@ -224,7 +224,7 @@ const listings = [
     category: 'home decor',
     visibility: 'friends_plus',
     markedBy: [] as string[],
-    status: 'active',
+    status: 'available',
   },
   {
     id: 'seed-listing-9',
@@ -238,7 +238,7 @@ const listings = [
     category: 'home & kitchen',
     visibility: 'friends',
     markedBy: [USER_UIDS.user1],
-    status: 'active',
+    status: 'available',
   },
   {
     id: 'seed-listing-10',
@@ -252,7 +252,7 @@ const listings = [
     category: 'outerwear',
     visibility: 'friends',
     markedBy: [USER_UIDS.user2],
-    status: 'active',
+    status: 'available',
   },
   {
     id: 'seed-listing-11',
@@ -266,7 +266,7 @@ const listings = [
     category: 'accessories',
     visibility: 'friends_plus',
     markedBy: [] as string[],
-    status: 'active',
+    status: 'available',
   },
   {
     id: 'seed-listing-12',
@@ -280,7 +280,67 @@ const listings = [
     category: 'boots',
     visibility: 'friends',
     markedBy: [USER_UIDS.user3],
-    status: 'active',
+    status: 'available',
+  },
+];
+
+// ============================================================
+// test transactions (completed sales)
+// ============================================================
+const transactions = [
+  {
+    id: 'seed-transaction-1',
+    buyerId: USER_UIDS.user2,
+    buyerUsername: 'jordan_lee',
+    buyerPhotoURL: undefined,
+    sellerId: USER_UIDS.user1,
+    sellerUsername: 'alex_kim',
+    sellerPhotoURL: undefined,
+    listingId: 'seed-listing-sold-1',
+    listingSnapshot: {
+      title: 'vintage levi's 501 jeans',
+      description: 'light wash. size 32x32. 90s era. great condition.',
+      price: 45,
+      photos: ['placeholder'],
+      closet: 'clothes',
+    },
+    price: 45,
+  },
+  {
+    id: 'seed-transaction-2',
+    buyerId: USER_UIDS.user1,
+    buyerUsername: 'alex_kim',
+    buyerPhotoURL: undefined,
+    sellerId: USER_UIDS.user2,
+    sellerUsername: 'jordan_lee',
+    sellerPhotoURL: undefined,
+    listingId: 'seed-listing-sold-2',
+    listingSnapshot: {
+      title: 'sony wh-1000xm4 headphones',
+      description: 'black. barely used. comes with case.',
+      price: 220,
+      photos: ['placeholder', 'placeholder'],
+      closet: 'electronics',
+    },
+    price: 220,
+  },
+  {
+    id: 'seed-transaction-3',
+    buyerId: USER_UIDS.user2,
+    buyerUsername: 'jordan_lee',
+    buyerPhotoURL: undefined,
+    sellerId: USER_UIDS.user3,
+    sellerUsername: 'taylor_wong',
+    sellerPhotoURL: undefined,
+    listingId: 'seed-listing-sold-3',
+    listingSnapshot: {
+      title: 'monstera plant',
+      description: 'large, healthy plant. includes ceramic pot.',
+      price: 30,
+      photos: ['placeholder'],
+      closet: 'plants',
+    },
+    price: 30,
   },
 ];
 
@@ -446,12 +506,23 @@ async function seed() {
     console.log(`    added ${convMessages.length} messages`);
   }
 
+  // seed transactions
+  console.log('\nseeding transactions...');
+  for (const txn of transactions) {
+    await setDoc(doc(db, 'transactions', txn.id), {
+      ...txn,
+      createdAt: Timestamp.fromDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)), // 7 days ago
+    });
+    console.log(`  created transaction: ${txn.listingSnapshot.title} (${txn.sellerUsername} -> ${txn.buyerUsername})`);
+  }
+
   console.log('\nseed complete!');
   console.log(`  ${users.length} users`);
   console.log(`  ${listings.length} listings`);
   console.log(`  ${friendRequests.length} friend requests`);
   console.log(`  ${conversations.length} conversations`);
   console.log(`  ${Object.values(messages).flat().length} messages`);
+  console.log(`  ${transactions.length} transactions`);
 
   process.exit(0);
 }

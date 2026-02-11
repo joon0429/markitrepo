@@ -1,7 +1,7 @@
 import { Timestamp } from 'firebase/firestore';
 
 export type ListingVisibility = 'friends' | 'friends_plus';
-export type ListingStatus = 'active' | 'sold' | 'deleted';
+export type ListingStatus = 'available' | 'sold' | 'archived';
 
 export interface Listing {
   id: string;
@@ -22,6 +22,11 @@ export interface Listing {
 
   createdAt: Timestamp;
   updatedAt: Timestamp;
+
+  // Transaction-related fields (optional)
+  soldAt?: Timestamp;            // When marked as sold
+  archivedAt?: Timestamp;        // When archived by seller
+  buyerId?: string;              // User ID of buyer (set when sold)
 }
 
 export interface CreateListingInput {

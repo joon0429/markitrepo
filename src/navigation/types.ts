@@ -1,7 +1,7 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import type { SerializableListing, SerializableConversation } from '@types';
+import type { SerializableListing, SerializableConversation, SerializableTransaction } from '@types';
 
 // root stack
 export type RootStackParamList = {
@@ -9,6 +9,7 @@ export type RootStackParamList = {
   Main: NavigatorScreenParams<MainTabParamList>;
   CreateListing: undefined; // modal presentation
   ListingConfirm: undefined;
+  TransactionSuccess: { transactionId: string };
 };
 
 // auth stack
@@ -55,6 +56,9 @@ export type ProfileStackParamList = {
   Settings: undefined;
   SettingsPlaceholder: { title: string; description?: string };
   EditProfile: undefined;
+  ArchivedListings: undefined;
+  TransactionHistory: { type: 'purchases' | 'sales' };
+  TransactionDetail: { transaction: SerializableTransaction };
 };
 
 // navigation prop types

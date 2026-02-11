@@ -22,7 +22,11 @@ service cloud.firestore {
         && (resource.data.sellerId == request.auth.uid
             // allow any authenticated user to update markedBy (for marking)
             || (request.resource.data.diff(resource.data).affectedKeys()
-                .hasOnly(['markedBy', 'updatedAt'])));
+                .hasOnly(['markedBy', 'updatedAt']))
+            // allow seller to update status fields (mark as sold, archive)
+            || (resource.data.sellerId == request.auth.uid
+                && request.resource.data.diff(resource.data).affectedKeys()
+                    .hasOnly(['status', 'soldAt', 'archivedAt', 'buyerId', 'updatedAt'])));
       allow delete: if request.auth != null
         && resource.data.sellerId == request.auth.uid;
     }
@@ -73,6 +77,19 @@ service cloud.firestore {
       // only the target user can update (mark as read)
       allow update: if request.auth != null
         && resource.data.userId == request.auth.uid;
+    }
+
+    // transactions collection (immutable records of completed sales)
+    match /transactions/{transactionId} {
+      // buyer or seller can read their own transactions
+      allow read: if request.auth != null
+        && (resource.data.buyerId == request.auth.uid
+            || resource.data.sellerId == request.auth.uid);
+      // only seller can create transaction (when marking item as sold)
+      allow create: if request.auth != null
+        && request.resource.data.sellerId == request.auth.uid;
+      // transactions are immutable - no updates or deletes
+      allow update, delete: if false;
     }
   }
 }

@@ -12,9 +12,11 @@ import {
   Timestamp,
   arrayUnion,
   arrayRemove,
+  writeBatch,
 } from 'firebase/firestore';
 import { db } from './config';
-import { Listing, CreateListingInput, UpdateListingInput } from '@types';
+import { Listing, CreateListingInput, UpdateListingInput, ListingStatus } from '@types';
+import { buildTransactionData, addTransactionToBatch } from './transactionService';
 
 // create a new listing
 export async function createListing(
@@ -38,7 +40,7 @@ export async function createListing(
     category: input.category,
     visibility: input.visibility,
     markedBy: [],
-    status: 'active',
+    status: 'available',
     createdAt: now,
     updatedAt: now,
   };
@@ -56,11 +58,15 @@ export async function getListingById(id: string): Promise<Listing | null> {
 }
 
 // get all listings for a specific user (for profile/boards)
-export async function getUserListings(userId: string): Promise<Listing[]> {
+// optionally filter by status
+export async function getUserListings(
+  userId: string,
+  status: ListingStatus = 'available'
+): Promise<Listing[]> {
   const q = query(
     collection(db, 'listings'),
     where('sellerId', '==', userId),
-    where('status', '==', 'active'),
+    where('status', '==', status),
     orderBy('createdAt', 'desc')
   );
   const snap = await getDocs(q);
@@ -87,7 +93,7 @@ export async function getFeedListings(
         collection(db, 'listings'),
         where('sellerId', 'in', batch),
         where('visibility', '==', 'friends'),
-        where('status', '==', 'active'),
+        where('status', '==', 'available'),
         orderBy('createdAt', 'desc')
       );
       const snap = await getDocs(q);
@@ -98,7 +104,7 @@ export async function getFeedListings(
         collection(db, 'listings'),
         where('sellerId', 'in', batch),
         where('visibility', '==', 'friends_plus'),
-        where('status', '==', 'active'),
+        where('status', '==', 'available'),
         orderBy('createdAt', 'desc')
       );
       const snap = await getDocs(q);
@@ -120,7 +126,7 @@ export async function getListingsByCloset(
     collection(db, 'listings'),
     where('sellerId', '==', userId),
     where('closet', '==', closet),
-    where('status', '==', 'active'),
+    where('status', '==', 'available'),
     orderBy('createdAt', 'desc')
   );
   const snap = await getDocs(q);
@@ -139,11 +145,12 @@ export async function updateListing(
   });
 }
 
-// soft delete a listing (set status to 'deleted')
+// soft delete a listing (set status to 'archived')
 export async function deleteListing(id: string): Promise<void> {
   const listingRef = doc(db, 'listings', id);
   await updateDoc(listingRef, {
-    status: 'deleted',
+    status: 'archived',
+    archivedAt: Timestamp.now(),
     updatedAt: Timestamp.now(),
   });
 }
@@ -170,4 +177,83 @@ export async function unmarkListing(
     markedBy: arrayRemove(userId),
     updatedAt: Timestamp.now(),
   });
+}
+
+// mark listing as sold - creates transaction + updates listing (atomic)
+export async function markListingAsSold(
+  listingId: string,
+  buyerId: string
+): Promise<string> {
+  // Fetch the listing
+  const listing = await getListingById(listingId);
+  if (!listing) {
+    throw new Error('Listing not found');
+  }
+
+  // Validate listing is available and buyer is in markedBy array
+  if (listing.status !== 'available') {
+    throw new Error('Listing is not available');
+  }
+  if (!listing.markedBy.includes(buyerId)) {
+    throw new Error('Buyer has not marked this listing');
+  }
+
+  // Build transaction data
+  const transactionData = await buildTransactionData(listing, buyerId);
+
+  // Atomic batch write: create transaction + update listing
+  const batch = writeBatch(db);
+  const now = Timestamp.now();
+
+  // Add transaction to batch
+  const transactionId = addTransactionToBatch(batch, transactionData);
+
+  // Update listing in batch
+  const listingRef = doc(db, 'listings', listingId);
+  batch.update(listingRef, {
+    status: 'sold',
+    soldAt: now,
+    buyerId,
+    updatedAt: now,
+  });
+
+  // Commit batch
+  await batch.commit();
+
+  return transactionId;
+}
+
+// archive a listing (seller removes without selling)
+export async function archiveListing(listingId: string): Promise<void> {
+  const listingRef = doc(db, 'listings', listingId);
+  const now = Timestamp.now();
+
+  await updateDoc(listingRef, {
+    status: 'archived',
+    archivedAt: now,
+    updatedAt: now,
+  });
+}
+
+// unarchive a listing (restore to available)
+export async function unarchiveListing(listingId: string): Promise<void> {
+  const listingRef = doc(db, 'listings', listingId);
+
+  await updateDoc(listingRef, {
+    status: 'available',
+    archivedAt: null,
+    updatedAt: Timestamp.now(),
+  });
+}
+
+// get seller's archived listings
+export async function getArchivedListings(sellerId: string): Promise<Listing[]> {
+  const q = query(
+    collection(db, 'listings'),
+    where('sellerId', '==', sellerId),
+    where('status', '==', 'archived'),
+    orderBy('archivedAt', 'desc')
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map(d => d.data() as Listing);
 }

@@ -3,6 +3,9 @@ import { useAuth } from '@contexts/AuthContext';
 import {
   markListing,
   unmarkListing,
+  markListingAsSold,
+  archiveListing,
+  unarchiveListing,
 } from '@services/firebase/listingService';
 import { SerializableListing } from '@types';
 
@@ -52,11 +55,29 @@ export function useListingDetail(listing: SerializableListing) {
     }
   }, [currentUserId, isMarked, listing.id, markLoading]);
 
+  const markAsSold = useCallback(
+    async (buyerId: string): Promise<string> => {
+      return await markListingAsSold(listing.id, buyerId);
+    },
+    [listing.id]
+  );
+
+  const archive = useCallback(async (): Promise<void> => {
+    await archiveListing(listing.id);
+  }, [listing.id]);
+
+  const unarchive = useCallback(async (): Promise<void> => {
+    await unarchiveListing(listing.id);
+  }, [listing.id]);
+
   return {
     isMarked,
     markCount,
     markLoading,
     toggleMark,
     doubleTapMark,
+    markAsSold,
+    archive,
+    unarchive,
   };
 }

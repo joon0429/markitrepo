@@ -61,8 +61,10 @@
 - **privacy toggle:** native switch component instead of button groups
 - **conversations:** facebook marketplace style - one conversation per user pair (not per listing), supports multiple listings per conversation, "other marks" button shows all discussed items
 - **closet management:** structured firestore collection with case-insensitive matching ("Shoes" = "shoes" = " shoes "), dropdown shows existing closets + create new option
-- **transaction flow:** seller marks item as sold → modal with buyer selector (from markedBy list) → creates immutable transaction record
-- **archived listings:** instagram-style archive section, archived items don't appear in feed or closet counts
+- **transaction flow:** seller marks item as sold → modal with buyer selector (from markedBy list) → creates immutable transaction record → navigates to success screen
+- **sold listings:** "sold" badge displayed on listing detail, mark button disabled for buyers
+- **archived listings:** instagram-style archive section with unarchive option, archived items don't appear in feed or closet counts
+- **transaction history:** separate screens for purchases vs sales, accessible from settings
 
 ### visual design
 
@@ -118,6 +120,8 @@
 - **conversation deduplication:** findConversation(userId1, userId2) - one conversation per user pair, multiple listings supported via listingIds[]
 - **conversation listing management:** add to listingIds[] when user clicks "send message"; remove when unmarking (keep in sync)
 - **batch writes for denormalization:** closet stats (itemCount, previewPhotos), listing updates, transaction creation all use atomic batch operations
+- **transaction creation:** markListingAsSold uses atomic batch (creates transaction doc + updates listing status/soldAt/buyerId in single operation)
+- **listing status values:** 'available' | 'sold' | 'archived' (changed from 'active'|'sold'|'deleted' in phase 10)
 - **migration scripts:** must be idempotent (skip already-migrated data); handle edge cases (null/empty values, duplicates)
 - **headers:** all via navigator screenOptions with shared defaultScreenOptions (never custom in-screen)
 
@@ -127,9 +131,9 @@
 |-------------|---------------|
 | `src/services/firebase/config.ts` | firebase init (auth + firestore), reads from app.config.js extra |
 | `src/services/firebase/userService.ts` | user CRUD (createUserProfile, getUserProfile, updateUserProfile) |
-| `src/services/firebase/listingService.ts` | listing CRUD + mark/unmark + feed queries with batching + archive/unarchive |
+| `src/services/firebase/listingService.ts` | listing CRUD + mark/unmark + feed queries with batching + markAsSold (atomic batch) + archive/unarchive |
 | `src/services/firebase/closetService.ts` | closet CRUD (getOrCreateCloset, rename with batch updates, stats management) |
-| `src/services/firebase/transactionService.ts` | transaction creation (atomic with listing update), purchase/sales history queries |
+| `src/services/firebase/transactionService.ts` | buildTransactionData (for batch writes), purchase/sales history queries (getUserPurchases, getUserSales) |
 | `src/services/firebase/friendService.ts` | friends + requests + search (atomic accept with batch writes) |
 | `src/services/firebase/messageService.ts` | conversations (user-pair deduplication, multi-listing support) + real-time messages + unread tracking |
 
@@ -188,6 +192,8 @@
 | empty closets | (2026-02-11) empty closets persist in firestore (itemCount=0, previewPhotos=[]); don't auto-delete when all items removed |
 | conversation per listing | (2026-02-11) WRONG - use one conversation per user pair (not per listing); support multiple listings via listingIds[] array |
 | migration script failures | (2026-02-11) always make migration scripts idempotent (check if already migrated, skip if so); handle null/empty values with defaults |
+| listing status enum change | (2026-02-11) changing status values requires data migration for existing docs; 'active'→'available', 'deleted'→'archived' |
+| atomic transaction creation | (2026-02-11) markAsSold must use batch write (transaction doc + listing update) to ensure data consistency |
 
 ---
 
@@ -219,16 +225,16 @@
 - search functionality, precise location/maps, in-app payments, price editing notifications
 
 ### next steps
-1. **backend implementation (IN PROGRESS)** - 45 tasks across 9 phases:
-   - phase 1: type definitions (closet, transaction, update listing/conversation/profile types)
-   - phase 2-5: services (closetService, transactionService, update listing/message services)
-   - phase 6: hooks (useClosets, useTransactions, update existing hooks)
-   - phase 7-8: ui (ClosetDropdown, transaction screens, archived listings, conversation updates)
-   - phase 9: firebase config + migration scripts
-2. run migration scripts (convert existing listings to closets, update conversation schema)
-3. deploy firestore security rules + indexes (closets, transactions)
-4. test all new features on device
-5. run seed data script with test closets/transactions
+1. **data migration** - update existing listings from status='active'→'available' in firestore
+2. **firebase deployment:**
+   - deploy firestore security rules (transactions collection + updated listings rules)
+   - deploy composite indexes (transactions by buyer/seller, archived listings)
+3. **device testing:**
+   - transaction flow: mark as sold → buyer selection → success screen
+   - archived listings: archive → unarchive flow
+   - purchase/sales history screens
+   - sold badge display on listings
+4. run seed data script with test transactions (3 sample transactions included)
 
 ---
 
@@ -302,27 +308,21 @@
 - **deferred:** firebase storage (paid plan), phone auth (needs native modules), push notifications
 - **mock data files preserved** in src/services/mock/ for reference (still references `Board` type -- not updated)
 
-### phase 10: backend implementation planning (2026-02-11, session 4)
-- comprehensive schema review: documented all 8 existing entities + relationships
-- designed new schema: closets collection (structured, normalized names), transactions collection (immutable history)
-- updated existing schema: listings (add closetId, buyerId, soldAt, archivedAt, 'archived' status), conversations (multi-listing support with listingIds[], initialListingId)
-- implementation plan: 45 tasks across 9 phases (types, services, hooks, ui, config, migration)
-- key decisions: closet normalization (case-insensitive), user-pair conversations, denormalized stats via batch writes
-- plan saved: .claude/plans/twinkly-jumping-lagoon.md
+### phase 10: transaction & purchase flow (2026-02-11, session 4) -- COMPLETE
+- **types updated:** Listing (added soldAt, archivedAt, buyerId fields; status enum: 'available'|'sold'|'archived'), Transaction interface created
+- **services:** transactionService.ts created (buildTransactionData, getUserPurchases/Sales); listingService updated (markListingAsSold with atomic batch, archiveListing, unarchiveListing, getArchivedListings)
+- **hooks:** useTransactions created, useProfile updated (purchaseCount/salesCount from transactions), useListingDetail updated (markAsSold, archive, unarchive functions)
+- **screens created:** TransactionSuccessScreen, TransactionHistoryScreen, TransactionDetailScreen, ArchivedListingsScreen (4 new screens)
+- **screens updated:** ListingDetailScreen (seller actions: mark as sold modal, archive button, sold badge), SettingsScreen (archive/history links)
+- **navigation:** all transaction routes registered in AppNavigator + MainNavigator
+- **firebase config:** firestore.rules updated (transactions collection + listing status updates), firestore.indexes.json updated (transaction indexes)
+- **test data:** seed.ts updated with 3 sample transactions
+- **implementation:** 19/19 tasks complete from transaction plan
 
 ### current status
-- **working:** auth, all screens wired to firebase
-- **in progress:** backend implementation (closets, conversations, transactions) - 45 tasks queued
-- **not deployed:** firestore security rules, composite indexes
+- **working:** auth, all screens wired to firebase, transaction flow fully implemented
+- **needs deployment:** firestore security rules + composite indexes (transaction indexes, archived listings index)
+- **needs data migration:** existing listings have status='active', need update to 'available'
+- **needs device testing:** transaction flow (mark as sold, buyer selection, success screen), archived listings (archive/unarchive), purchase/sales history, sold badges
 - **deferred:** firebase storage (paid plan), phone auth (needs native modules), push notifications
 - **mock data files preserved** in src/services/mock/ for reference (still references `Board` type -- not updated)
-
-### needs device testing (session 3 changes)
-- feed tab labels visible on dark background
-- messages "+" -> coming soon screen navigation
-- create listing without photos (no validation error)
-- price input: $ prefix, 2 decimal limit, inline error over $9,999.99
-- create listing -> confirm screen -> return to home flow
-- edit profile save -> immediate navigate back
-- profile header: name (bold) / @username / bio layout
-- notifications filter tags not stretched

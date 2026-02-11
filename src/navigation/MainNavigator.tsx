@@ -18,6 +18,9 @@ import EditItemScreen from '@screens/profile/EditItemScreen';
 import SettingsScreen from '@screens/profile/SettingsScreen';
 import SettingsPlaceholderScreen from '@screens/profile/SettingsPlaceholderScreen';
 import EditProfileScreen from '@screens/profile/EditProfileScreen';
+import ArchivedListingsScreen from '@screens/profile/ArchivedListingsScreen';
+import TransactionHistoryScreen from '@screens/transactions/TransactionHistoryScreen';
+import TransactionDetailScreen from '@screens/transactions/TransactionDetailScreen';
 import { colors, typography } from '@constants/theme';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -201,6 +204,23 @@ function ProfileStackNavigator() {
         name="EditProfile"
         component={EditProfileScreen}
         options={{ title: 'edit profile' }}
+      />
+      <ProfileStack.Screen
+        name="ArchivedListings"
+        component={ArchivedListingsScreen}
+        options={{ title: 'archived' }}
+      />
+      <ProfileStack.Screen
+        name="TransactionHistory"
+        component={TransactionHistoryScreen}
+        options={({ route }) => ({
+          title: route.params.type === 'purchases' ? 'purchases' : 'sales',
+        })}
+      />
+      <ProfileStack.Screen
+        name="TransactionDetail"
+        component={TransactionDetailScreen}
+        options={{ title: 'transaction' }}
       />
     </ProfileStack.Navigator>
   );
