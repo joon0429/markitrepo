@@ -18,8 +18,17 @@ interface DropdownProps {
 
 export default function Dropdown({ label, value, onChange, options, placeholder = 'select...', error }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [selectorLayout, setSelectorLayout] = useState({ y: 0, height: 0 });
+  const selectorRef = React.useRef<View>(null);
 
   const selectedOption = options.find(opt => opt.value === value);
+
+  const handleOpen = () => {
+    selectorRef.current?.measureInWindow((x, y, width, height) => {
+      setSelectorLayout({ y, height });
+      setIsOpen(true);
+    });
+  };
 
   const handleSelect = (optionValue: string) => {
     onChange(optionValue);
@@ -31,8 +40,9 @@ export default function Dropdown({ label, value, onChange, options, placeholder 
       {label && <Text style={styles.label}>{label}</Text>}
 
       <TouchableOpacity
+        ref={selectorRef}
         style={[styles.selector, error && styles.selectorError]}
-        onPress={() => setIsOpen(true)}
+        onPress={handleOpen}
         activeOpacity={0.7}
       >
         <Text style={[styles.selectorText, !selectedOption && styles.selectorPlaceholder]}>
@@ -54,7 +64,15 @@ export default function Dropdown({ label, value, onChange, options, placeholder 
           activeOpacity={1}
           onPress={() => setIsOpen(false)}
         >
-          <View style={styles.modalContent}>
+          <View
+            style={[
+              styles.modalContent,
+              {
+                top: selectorLayout.y + selectorLayout.height + 4,
+                marginHorizontal: spacing.lg,
+              }
+            ]}
+          >
             <FlatList
               data={options}
               keyExtractor={(item) => item.value}
@@ -131,10 +149,11 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
   },
   modalContent: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
     backgroundColor: colors.background,
     borderRadius: borderRadius.lg,
     maxHeight: 400,

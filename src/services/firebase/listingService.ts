@@ -24,28 +24,44 @@ export async function createListing(
   username: string,
   input: CreateListingInput
 ): Promise<string> {
+  console.log('[listingService] createListing called with:', { userId, username, input });
+
   const listingRef = doc(collection(db, 'listings'));
+  console.log('[listingService] created doc reference:', listingRef.id);
+
   const now = Timestamp.now();
 
   const listing: Listing = {
     id: listingRef.id,
     sellerId: userId,
     sellerUsername: username,
-    sellerPhotoURL: undefined,
+    sellerPhotoURL: null,
     title: input.title,
     description: input.description,
     price: input.price,
     photos: input.photoURIs.length > 0 ? input.photoURIs : ['placeholder'],
     closet: input.closet,
-    category: input.category,
+    category: input.category || null,
     visibility: input.visibility,
     markedBy: [],
     status: 'available',
     createdAt: now,
     updatedAt: now,
+    soldAt: null,
+    archivedAt: null,
+    buyerId: null,
   };
 
-  await setDoc(listingRef, listing);
+  console.log('[listingService] about to call setDoc with listing:', listing);
+
+  try {
+    await setDoc(listingRef, listing);
+    console.log('[listingService] setDoc SUCCESS! listing id:', listingRef.id);
+  } catch (error) {
+    console.error('[listingService] setDoc FAILED:', error);
+    throw error;
+  }
+
   return listingRef.id;
 }
 

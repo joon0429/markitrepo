@@ -7,14 +7,14 @@ export interface Listing {
   id: string;
   sellerId: string;
   sellerUsername: string;        // Denormalized
-  sellerPhotoURL?: string;       // Denormalized
+  sellerPhotoURL: string | null; // Denormalized (null if no photo)
 
   title: string;
   description: string;
   price: number;
   photos: string[];              // 1-4 Storage URLs
   closet: string;                // User-defined category/board name
-  category?: string;             // Optional category tag
+  category: string | null;       // Optional category tag (null if none)
 
   visibility: ListingVisibility;
   markedBy: string[];            // Array of user IDs who marked
@@ -23,10 +23,10 @@ export interface Listing {
   createdAt: Timestamp;
   updatedAt: Timestamp;
 
-  // Transaction-related fields (optional)
-  soldAt?: Timestamp;            // When marked as sold
-  archivedAt?: Timestamp;        // When archived by seller
-  buyerId?: string;              // User ID of buyer (set when sold)
+  // Transaction-related fields (set when applicable)
+  soldAt: Timestamp | null;      // When marked as sold (null if not sold)
+  archivedAt: Timestamp | null;  // When archived by seller (null if not archived)
+  buyerId: string | null;        // User ID of buyer (null if not sold)
 }
 
 export interface CreateListingInput {
@@ -35,7 +35,7 @@ export interface CreateListingInput {
   price: number;
   photoURIs: string[];           // Local URIs before upload
   closet: string;
-  category?: string;
+  category?: string | null;      // Optional category (null if none)
   visibility: ListingVisibility;
 }
 

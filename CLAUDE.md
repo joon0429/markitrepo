@@ -1,7 +1,7 @@
 # CLAUDE.md - project context & design system
 
 > this file is automatically read by claude code at the start of every conversation.
-> last updated: 2026-02-11 (session 4)
+> last updated: 2026-02-12 (session 5)
 
 ---
 
@@ -46,7 +46,7 @@
 - **"mark.it" action:** soft reservation system - seller sees who marked
 - **messaging:** real-time chat tied to specific listings with listing context card
 - **instagram-style UX:** friends list with search, DM-style conversations
-- **dropdown selectors:** modal overlay with option list for structured inputs (closets)
+- **dropdown selectors:** modal overlay anchored to selector (not centered), options ordered: "unnamed" first, then alphabetical, then "add more..." last
 - **header separator:** subtle border line (#2C2C2C) below all screen headers via defaultScreenOptions
 - **settings access:** hamburger menu icon (menu-outline) in profile header top-right -> settings page
 - **edit profile:** instagram-style edit screen (name, username, bio, profile picture placeholder); save navigates back immediately (no alert)
@@ -60,7 +60,7 @@
 - **messages access:** envelope icon in feed header navigates to conversations
 - **privacy toggle:** native switch component instead of button groups
 - **conversations:** facebook marketplace style - one conversation per user pair (not per listing), supports multiple listings per conversation, "other marks" button shows all discussed items
-- **closet management:** structured firestore collection with case-insensitive matching ("Shoes" = "shoes" = " shoes "), dropdown shows existing closets + create new option
+- **closet management:** structured firestore collection with case-insensitive matching ("Shoes" = "shoes" = " shoes "), dropdown shows existing closets + create new option via Alert.prompt (iOS-only)
 - **transaction flow:** seller marks item as sold → modal with buyer selector (from markedBy list) → creates immutable transaction record → navigates to success screen
 - **sold listings:** "sold" badge displayed on listing detail, mark button disabled for buyers
 - **archived listings:** instagram-style archive section with unarchive option, archived items don't appear in feed or closet counts
@@ -105,12 +105,14 @@
 | transactions | immutable firestore collection | snapshots listing data at sale time, tracks purchase/sales history |
 | floating labels | react-native-paper TextInput mode="outlined" | Input component supports `floatingLabel` prop for Pinterest-style labels |
 | firebase CLI deployment | firebase.json + .firebaserc at project root | required for `firebase deploy` commands; .firebaserc specifies project ID, firebase.json specifies rules/indexes paths |
+| environment variables | dotenv package loaded in app.config.js | MUST require('dotenv').config() at top of app.config.js to load .env file before accessing process.env |
+| firestore optional fields | use `null` instead of `undefined` | Firestore rejects `undefined` values; use `field: type \| null` instead of `field?: type` for optional fields |
 
 ### key patterns
 
 - **navigation params:** use serializable versions with ISO strings (React Navigation can't handle Timestamp objects)
 - **component organization:** feature folders (profile/, friends/, messages/)
-- **form input limits:** title 50 chars, description 50 words, price max $9,999.99; counters shown BELOW input boxes
+- **form input limits:** title 50 chars (min 3), description 50 words max (no minimum), price max $9,999.99; counters shown BELOW input boxes
 - **price input:** $ prefix via PaperTextInput.Affix, decimal-pad keyboard, 2 decimal places max, inline error (not capped) if over limit
 - **create listing flow:** modal presentation at root level -> on success, navigation.replace to ListingConfirm screen -> "return to home" resets to Main
 - **closet selection:** dropdown shows existing closets (from firestore) + "create new" option; normalized matching (trim + lowercase)
@@ -199,6 +201,11 @@
 | firebase CLI setup | (2026-02-11) firebase deploy requires firebase.json + .firebaserc files at project root; firebase CLI installed via `npm install -g firebase-tools` in WSL |
 | Button component flexibility | (2026-02-11) common components should accept optional `style` prop (ViewStyle) for layout flexibility without duplicating component logic |
 | silent form validation failures | (2026-02-11) add explicit Alert.alert() for validation failures during debugging; silent returns make issues hard to diagnose |
+| .env not loading in app.config.js | (2026-02-12) CRITICAL: must add `require('dotenv').config()` at top of app.config.js; without it, firebase config values are undefined and writes fail silently |
+| firestore undefined field values | (2026-02-12) Firestore rejects documents with `undefined` field values; use `null` for optional fields, never `undefined` |
+| TypeScript optional vs null types | (2026-02-12) `field?: string` creates `undefined` which breaks Firestore; use `field: string \| null` and explicitly set to `null` in all documents |
+| FlatList numColumns stretching | (2026-02-12) cards with `flex: 1` in FlatList with numColumns will stretch to fill row when odd number of items; add `maxWidth: '50%'` to constrain |
+| Alert.prompt platform support | (2026-02-12) Alert.prompt is iOS-only; need cross-platform solution (custom modal) for Android support |
 
 ---
 
@@ -230,14 +237,16 @@
 - search functionality, precise location/maps, in-app payments, price editing notifications
 
 ### next steps
-1. **debug listing creation** - listings aren't appearing in firestore after create button pressed; validation passes but write may be failing
-2. **run seed data script** - populate test data with transactions (seed.ts ready, needs user UIDs updated)
-3. **device testing:**
+1. **device testing** - test all new functionality on iPhone via Expo Go:
    - listing creation flow (create → confirm screen → appears in feed/profile)
+   - custom closet names (Alert.prompt)
+   - dropdown positioning
+   - profile grid layout with odd numbers
    - transaction flow: mark as sold → buyer selection → success screen
    - archived listings: archive → unarchive flow
    - purchase/sales history screens
-   - sold badge display on listings
+2. **run seed data script** - populate test data with transactions (seed.ts ready, needs user UIDs updated)
+3. **implement cross-platform closet creation** - replace iOS-only Alert.prompt with custom modal for Android support
 
 ---
 
@@ -322,11 +331,21 @@
 - **test data:** seed.ts updated with 3 sample transactions
 - **implementation:** 19/19 tasks complete from transaction plan
 
-### current status (session 4 - 2026-02-11)
-- **working:** auth, all screens wired to firebase, transaction flow fully implemented
-- **deployed:** firestore.rules (transactions + listings), firestore.indexes.json (8 composite indexes - removed unnecessary single-field messages index)
-- **debugging:** listing creation not persisting to firestore (validation passes, no errors, but listings don't appear in console or profile)
-- **created:** firebase.json + .firebaserc for firebase CLI deployment, Button component updated with style prop
-- **needs testing:** listing creation flow, transaction flow, archived listings, purchase/sales history
+### phase 11: listing creation debug & UI fixes (2026-02-12, session 5) -- COMPLETE
+- **critical bug fix:** dotenv package installed, `require('dotenv').config()` added to app.config.js - firebase config was undefined
+- **type system fix:** Listing interface updated - all optional fields changed from `field?: type` to `field: type | null` (Firestore rejects undefined)
+- **listing creation working:** createListing now properly initializes all fields with null defaults instead of undefined
+- **dropdown improvements:** anchored to selector using measureInWindow (not centered), closet options ordered (unnamed → alphabetical → add more)
+- **custom closet creation:** Alert.prompt implemented for iOS (allows user to create custom closet names on the fly)
+- **validation adjustments:** removed 3-word minimum requirement for description field
+- **profile grid fix:** ClosetCard maxWidth: '50%' prevents stretching when odd number of closets
+- **debug logging:** comprehensive console.log added to listingService for troubleshooting
+- **button loading state:** Button component now shows loading indicator during async operations
+
+### current status (session 5 - 2026-02-12)
+- **working:** listing creation fully functional, auth, all screens wired to firebase, transaction flow
+- **deployed:** firestore.rules, firestore.indexes.json, dotenv package installed
+- **needs testing:** all session 5 changes on device (listing creation, dropdown, custom closets, profile grid)
+- **known limitation:** Alert.prompt is iOS-only; need cross-platform solution for Android
 - **deferred:** firebase storage (paid plan), phone auth (needs native modules), push notifications
 - **mock data files preserved** in src/services/mock/ for reference (still references `Board` type -- not updated)

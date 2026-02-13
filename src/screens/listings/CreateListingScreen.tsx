@@ -47,12 +47,13 @@ export default function CreateListingScreen() {
   const [isPrivate, setIsPrivate] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  // closet options for dropdown
+  // closet options for dropdown (alphabetically sorted)
   const closetOptions = [
     { label: 'unnamed', value: 'unnamed' },
+    { label: 'accessories', value: 'accessories' },
     { label: 'clothes', value: 'clothes' },
-    { label: 'shoes', value: 'shoes' },
     { label: 'furniture', value: 'furniture' },
+    { label: 'shoes', value: 'shoes' },
     { label: 'add more...', value: 'add_more' },
   ];
 
@@ -162,8 +163,6 @@ export default function CreateListingScreen() {
     const wordCount = getWordCount(description);
     if (!description.trim()) {
       newErrors.description = 'description is required';
-    } else if (wordCount < 3) {
-      newErrors.description = 'description must be at least 3 words';
     } else if (wordCount > DESCRIPTION_WORD_LIMIT) {
       newErrors.description = `description must be ${DESCRIPTION_WORD_LIMIT} words or less`;
     }
@@ -222,6 +221,7 @@ export default function CreateListingScreen() {
       const listingId = await createListing(user.uid, userProfile.username, input);
 
       console.log('listing created successfully! id:', listingId);
+      Alert.alert('success', `listing created with id: ${listingId}`);
 
       navigation.replace('ListingConfirm');
     } catch (err: any) {
@@ -340,7 +340,25 @@ export default function CreateListingScreen() {
             value={closet}
             onChange={(value) => {
               if (value === 'add_more') {
-                Alert.alert('add more closets', 'create custom closets (coming soon)');
+                Alert.prompt(
+                  'create new closet',
+                  'enter a name for your new closet:',
+                  [
+                    {
+                      text: 'cancel',
+                      style: 'cancel',
+                    },
+                    {
+                      text: 'create',
+                      onPress: (inputValue) => {
+                        if (inputValue && inputValue.trim()) {
+                          setCloset(inputValue.trim().toLowerCase());
+                        }
+                      },
+                    },
+                  ],
+                  'plain-text'
+                );
               } else {
                 setCloset(value);
               }
@@ -370,6 +388,7 @@ export default function CreateListingScreen() {
         <Button
           title="add listing"
           onPress={handleCreate}
+          loading={creating}
           style={styles.createButton}
         />
 

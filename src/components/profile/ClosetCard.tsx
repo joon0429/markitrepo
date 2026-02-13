@@ -35,6 +35,7 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     margin: spacing.xs,
+    maxWidth: '50%',
     borderRadius: borderRadius.lg,
     backgroundColor: colors.surface,
     overflow: 'hidden',
