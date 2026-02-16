@@ -1,6 +1,6 @@
 # CLAUDE.md - mark.it
 
-> last updated: 2026-02-16 (session 6)
+> last updated: 2026-02-16 (session 7)
 
 ---
 
@@ -58,13 +58,16 @@
 - **file naming:** PascalCase for components, camelCase for utilities
 - **imports:** absolute paths with TypeScript aliases (@components/*, @hooks/*, etc.)
 - **closet normalization:** `name.trim().toLowerCase()` for matching; displayName preserves user casing
-- **firestore 'in' queries:** batch arrays into groups of 30
+- **firestore 'in' queries:** use `batchInQuery()` from `@utils/firestore` (handles 30-item batching)
 - **conversations:** one per user pair (NOT per listing), multiple listings via listingIds[]
 - **batch writes:** used for all denormalized updates (closets, transactions, listing status changes)
 - **listing status values:** `'available' | 'sold' | 'archived'`
 - **form inputs:** counters BELOW input boxes, never silently cap values (show inline error instead)
 - **success actions:** no alert -- navigate directly or to confirm screen
 - **"coming soon" screens:** reuse SettingsPlaceholderScreen with generic route typing
+- **listing forms:** shared ListingForm component used by CreateListingScreen and EditItemScreen
+- **async data hooks:** useAsyncData generic hook handles loading/error/refresh boilerplate
+- **hardcoded colors:** use `colors.white` from theme, never `'#FFFFFF'`
 
 ---
 
@@ -90,7 +93,6 @@
 | `config.ts` | firebase init, reads from app.config.js extra |
 | `userService.ts` | user CRUD |
 | `listingService.ts` | listing CRUD, mark/unmark, feed queries, markAsSold (atomic batch), archive |
-| `closetService.ts` | closet CRUD, normalized names, stats via batch writes |
 | `transactionService.ts` | buildTransactionData, purchase/sales history |
 | `friendService.ts` | friends, requests, search, atomic accept |
 | `messageService.ts` | conversations (user-pair dedup), real-time messages, unread tracking |
@@ -101,8 +103,8 @@ all in `src/services/firebase/`
 
 | hook | concern |
 |------|---------|
-| `useProfile` | profile + stats (includes purchase/sales counts) |
-| `useClosets` | user's closets from firestore |
+| `useAsyncData` | generic async data fetching (loading/error/refresh) |
+| `useProfile` | profile + stats + computed closets (includes purchase/sales counts) |
 | `useListings` | feed by visibility, filters sold/archived |
 | `useListingDetail` | mark/unmark (optimistic UI), markAsSold, archive |
 | `useTransactions` | purchase or sales history |
@@ -184,7 +186,7 @@ analytics, QR codes, reputation, search, maps, in-app payments, price edit notif
 
 ## development log
 
-@DEVLOG.md
+@docs/DEVLOG.md
 
 ---
 

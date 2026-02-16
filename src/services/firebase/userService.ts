@@ -18,10 +18,14 @@ export async function createUserProfile(
     email,
     createdAt: now,
     updatedAt: now,
+    bio: null,
+    photoURL: null,
+    city: null,
     friendIds: [],
     pendingFriendRequests: [],
     sentFriendRequests: [],
     notificationsEnabled: true,
+    pushToken: null,
   };
 
   await setDoc(userRef, userData);

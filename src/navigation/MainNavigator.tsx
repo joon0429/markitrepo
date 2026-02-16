@@ -1,11 +1,18 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-import { MainTabParamList, FeedStackParamList, NotificationsStackParamList, MapStackParamList, ProfileStackParamList, RootStackParamList } from './types';
+import {
+  MainTabParamList,
+  FeedStackParamList,
+  NotificationsStackParamList,
+  MapStackParamList,
+  ProfileStackParamList,
+  RootStackParamList,
+} from './types';
 import FeedScreen from '@screens/feed/FeedScreen';
 import ListingDetailScreen from '@screens/feed/ListingDetailScreen';
 import ConversationsScreen from '@screens/messages/ConversationsScreen';
@@ -24,12 +31,12 @@ import TransactionDetailScreen from '@screens/transactions/TransactionDetailScre
 import { colors, typography } from '@constants/theme';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
-const FeedStack = createStackNavigator<FeedStackParamList>();
-const NotificationsStack = createStackNavigator<NotificationsStackParamList>();
-const MapStack = createStackNavigator<MapStackParamList>();
-const ProfileStack = createStackNavigator<ProfileStackParamList>();
+const FeedStackNav = createStackNavigator<FeedStackParamList>();
+const NotificationsStackNav = createStackNavigator<NotificationsStackParamList>();
+const MapStackNav = createStackNavigator<MapStackParamList>();
+const ProfileStackNav = createStackNavigator<ProfileStackParamList>();
 
-const defaultScreenOptions = {
+const defaultScreenOptions: StackNavigationOptions = {
   headerStyle: {
     backgroundColor: colors.background,
     borderBottomWidth: 1,
@@ -44,10 +51,47 @@ const defaultScreenOptions = {
   },
 };
 
+// shared messaging screens -- used in both FeedStack and NotificationsStack
+function addMessagingScreens<T extends { Conversations: undefined; Chat: any; ComingSoon: any }>(
+  Stack: ReturnType<typeof createStackNavigator<T>>
+) {
+  return (
+    <>
+      <Stack.Screen
+        name={'Conversations' as any}
+        component={ConversationsScreen}
+        options={({ navigation }: any) => ({
+          title: 'messages',
+          headerRight: () => (
+            <TouchableOpacity
+              style={headerButtonStyles.headerButton}
+              onPress={() => navigation.navigate('ComingSoon', { title: 'new message', description: 'start new conversations from here' })}
+            >
+              <Ionicons name="add-outline" size={24} color={colors.text} />
+            </TouchableOpacity>
+          ),
+        })}
+      />
+      <Stack.Screen
+        name={'Chat' as any}
+        component={ChatScreen}
+        options={{ title: '' }}
+      />
+      <Stack.Screen
+        name={'ComingSoon' as any}
+        component={SettingsPlaceholderScreen}
+        options={({ route }: any) => ({
+          title: (route.params as { title: string })?.title || 'coming soon',
+        })}
+      />
+    </>
+  );
+}
+
 function FeedStackNavigator() {
   return (
-    <FeedStack.Navigator screenOptions={defaultScreenOptions}>
-      <FeedStack.Screen
+    <FeedStackNav.Navigator screenOptions={defaultScreenOptions}>
+      <FeedStackNav.Screen
         name="Feed"
         component={FeedScreen}
         options={({ navigation }) => ({
@@ -61,7 +105,7 @@ function FeedStackNavigator() {
           headerLeft: () => <View style={headerButtonStyles.headerSpacer} />,
           headerRight: () => (
             <TouchableOpacity
-              style={headerButtonStyles.messageButton}
+              style={headerButtonStyles.headerButton}
               onPress={() => navigation.navigate('Conversations')}
             >
               <Ionicons name="chatbubble-outline" size={22} color={colors.text} />
@@ -69,51 +113,27 @@ function FeedStackNavigator() {
           ),
         })}
       />
-      <FeedStack.Screen
+      <FeedStackNav.Screen
         name="ListingDetail"
         component={ListingDetailScreen}
         options={{ title: 'listing' }}
       />
-      <FeedStack.Screen
-        name="Conversations"
-        component={ConversationsScreen}
-        options={({ navigation }) => ({
-          title: 'messages',
-          headerRight: () => (
-            <TouchableOpacity
-              style={headerButtonStyles.messageButton}
-              onPress={() => navigation.navigate('ComingSoon', { title: 'new message', description: 'start new conversations from here' })}
-            >
-              <Ionicons name="add-outline" size={24} color={colors.text} />
-            </TouchableOpacity>
-          ),
-        })}
-      />
-      <FeedStack.Screen
-        name="Chat"
-        component={ChatScreen}
-        options={{ title: '' }}
-      />
-      <FeedStack.Screen
-        name="ComingSoon"
-        component={SettingsPlaceholderScreen}
-        options={({ route }) => ({ title: (route.params as any)?.title || 'coming soon' })}
-      />
-    </FeedStack.Navigator>
+      {addMessagingScreens(FeedStackNav)}
+    </FeedStackNav.Navigator>
   );
 }
 
 function NotificationsStackNavigator() {
   return (
-    <NotificationsStack.Navigator screenOptions={defaultScreenOptions}>
-      <NotificationsStack.Screen
+    <NotificationsStackNav.Navigator screenOptions={defaultScreenOptions}>
+      <NotificationsStackNav.Screen
         name="Notifications"
         component={NotificationsScreen}
         options={({ navigation }) => ({
           title: 'notifications',
           headerRight: () => (
             <TouchableOpacity
-              style={headerButtonStyles.messageButton}
+              style={headerButtonStyles.headerButton}
               onPress={() => navigation.navigate('Conversations')}
             >
               <Ionicons name="chatbubble-outline" size={22} color={colors.text} />
@@ -121,58 +141,34 @@ function NotificationsStackNavigator() {
           ),
         })}
       />
-      <NotificationsStack.Screen
-        name="Conversations"
-        component={ConversationsScreen}
-        options={({ navigation }) => ({
-          title: 'messages',
-          headerRight: () => (
-            <TouchableOpacity
-              style={headerButtonStyles.messageButton}
-              onPress={() => navigation.navigate('ComingSoon', { title: 'new message', description: 'start new conversations from here' })}
-            >
-              <Ionicons name="add-outline" size={24} color={colors.text} />
-            </TouchableOpacity>
-          ),
-        })}
-      />
-      <NotificationsStack.Screen
-        name="Chat"
-        component={ChatScreen}
-        options={{ title: '' }}
-      />
-      <NotificationsStack.Screen
-        name="ComingSoon"
-        component={SettingsPlaceholderScreen}
-        options={({ route }) => ({ title: (route.params as any)?.title || 'coming soon' })}
-      />
-    </NotificationsStack.Navigator>
+      {addMessagingScreens(NotificationsStackNav)}
+    </NotificationsStackNav.Navigator>
   );
 }
 
 function MapStackNavigator() {
   return (
-    <MapStack.Navigator screenOptions={defaultScreenOptions}>
-      <MapStack.Screen
+    <MapStackNav.Navigator screenOptions={defaultScreenOptions}>
+      <MapStackNav.Screen
         name="Map"
         component={MapScreen}
         options={{ title: 'map' }}
       />
-    </MapStack.Navigator>
+    </MapStackNav.Navigator>
   );
 }
 
 function ProfileStackNavigator() {
   return (
-    <ProfileStack.Navigator screenOptions={defaultScreenOptions}>
-      <ProfileStack.Screen
+    <ProfileStackNav.Navigator screenOptions={defaultScreenOptions}>
+      <ProfileStackNav.Screen
         name="Profile"
         component={ProfileScreen}
         options={({ navigation }) => ({
           title: 'profile',
           headerRight: () => (
             <TouchableOpacity
-              style={headerButtonStyles.messageButton}
+              style={headerButtonStyles.headerButton}
               onPress={() => navigation.navigate('Settings')}
             >
               <Ionicons name="menu-outline" size={24} color={colors.text} />
@@ -180,53 +176,53 @@ function ProfileStackNavigator() {
           ),
         })}
       />
-      <ProfileStack.Screen
+      <ProfileStackNav.Screen
         name="ClosetDetail"
         component={ClosetDetailScreen}
         options={{ title: '' }}
       />
-      <ProfileStack.Screen
+      <ProfileStackNav.Screen
         name="EditItem"
         component={EditItemScreen}
         options={{ title: 'edit item' }}
       />
-      <ProfileStack.Screen
+      <ProfileStackNav.Screen
         name="Settings"
         component={SettingsScreen}
         options={{ title: 'settings' }}
       />
-      <ProfileStack.Screen
+      <ProfileStackNav.Screen
         name="SettingsPlaceholder"
         component={SettingsPlaceholderScreen}
         options={({ route }) => ({ title: route.params.title })}
       />
-      <ProfileStack.Screen
+      <ProfileStackNav.Screen
         name="EditProfile"
         component={EditProfileScreen}
         options={{ title: 'edit profile' }}
       />
-      <ProfileStack.Screen
+      <ProfileStackNav.Screen
         name="ArchivedListings"
         component={ArchivedListingsScreen}
         options={{ title: 'archived' }}
       />
-      <ProfileStack.Screen
+      <ProfileStackNav.Screen
         name="TransactionHistory"
         component={TransactionHistoryScreen}
         options={({ route }) => ({
           title: route.params.type === 'purchases' ? 'purchases' : 'sales',
         })}
       />
-      <ProfileStack.Screen
+      <ProfileStackNav.Screen
         name="TransactionDetail"
         component={TransactionDetailScreen}
         options={{ title: 'transaction' }}
       />
-    </ProfileStack.Navigator>
+    </ProfileStackNav.Navigator>
   );
 }
 
-// placeholder component for tabs
+// placeholder component for create tab
 function TabPlaceholder() {
   return null;
 }
@@ -317,7 +313,7 @@ const headerButtonStyles = StyleSheet.create({
   headerSpacer: {
     width: 48,
   },
-  messageButton: {
+  headerButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
   },

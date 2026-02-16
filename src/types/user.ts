@@ -5,9 +5,9 @@ export interface User {
   username: string;              // Unique, lowercase, searchable
   displayName: string;
   email: string;
-  bio?: string;
-  photoURL?: string;             // Firebase Storage URL
-  city?: string;                 // City-level location only
+  bio: string | null;
+  photoURL: string | null;       // Firebase Storage URL
+  city: string | null;           // City-level location only
   createdAt: Timestamp;
   updatedAt: Timestamp;
 
@@ -16,16 +16,16 @@ export interface User {
   sentFriendRequests: string[];
 
   notificationsEnabled: boolean;
-  pushToken?: string;            // FCM token
+  pushToken: string | null;      // FCM token
 }
 
 export interface UserProfile {
   uid: string;
   username: string;
   displayName: string;
-  photoURL?: string;
-  city?: string;
-  bio?: string;
+  photoURL: string | null;
+  city: string | null;
+  bio: string | null;
 }
 
 export interface CreateUserInput {

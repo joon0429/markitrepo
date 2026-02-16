@@ -1,4 +1,4 @@
-update project docs based on this session's work. read CLAUDE.md and DEVLOG.md first, then make minimal targeted edits:
+update project docs based on this session's work. read CLAUDE.md and docs/DEVLOG.md first, then make minimal targeted edits:
 
 **CLAUDE.md** -- only update if this session produced:
 - new hard rules or constraints

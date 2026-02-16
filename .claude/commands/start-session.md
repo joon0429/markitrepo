@@ -1,7 +1,7 @@
 starting a new session. do the following in parallel where possible:
 
 1. **check git state** -- run `git status` and `git log --oneline -5` (no TODO scan needed unless user requests it)
-2. **read DEVLOG.md** -- find the latest phase and current status
+2. **read docs/DEVLOG.md** -- find the latest phase and current status
 
 then provide a **short bullet-point summary** covering:
 - where we left off (last phase + status from DEVLOG.md)

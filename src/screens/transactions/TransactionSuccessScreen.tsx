@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
-import { Text } from 'react-native-paper';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@navigation/types';
@@ -32,7 +31,7 @@ export default function TransactionSuccessScreen() {
         const data = await getTransaction(transactionId);
         setTransaction(data);
       } catch (err) {
-        console.error('failed to load transaction:', err);
+        // silently handle error
       } finally {
         setLoading(false);
       }
@@ -134,7 +133,7 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
   },
   sectionTitle: {
-    ...typography.caption,
+    fontSize: typography.fontSize.xs,
     color: colors.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 1,
@@ -152,7 +151,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   buyerUsername: {
-    ...typography.bodyLarge,
+    fontSize: typography.fontSize.md,
     color: colors.text,
   },
   itemInfo: {
@@ -162,16 +161,17 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   itemTitle: {
-    ...typography.bodyLarge,
+    fontSize: typography.fontSize.md,
     color: colors.text,
-    fontWeight: '600',
+    fontWeight: typography.fontWeight.semibold,
   },
   itemPrice: {
-    ...typography.h3,
+    fontSize: typography.fontSize.lg,
     color: colors.primary,
+    fontWeight: typography.fontWeight.bold,
   },
   itemCloset: {
-    ...typography.body,
+    fontSize: typography.fontSize.sm,
     color: colors.text,
     padding: spacing.md,
     backgroundColor: colors.surface,

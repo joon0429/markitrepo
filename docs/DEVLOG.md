@@ -83,10 +83,26 @@
 - debug logging: console.log added to listingService
 - button loading state: Button component shows loading indicator during async
 
-## status as of session 5 (2026-02-12)
+## phase 12: code refactoring & cleanup (2026-02-16, session 7) -- COMPLETE
+- **repo cleanup:** removed TRANSACTION_PLAN.md, src/services/mock/ (outdated), dead ProfileListingsGrid
+- **file reorganization:** firestore configs moved to firebase/, DEVLOG moved to docs/
+- **README:** created proper README.md with stack, features, project structure, setup
+- **code hygiene:** removed 17+ console.log statements, fixed optional types (? -> | null), fixed success alerts
+- **type system:** User and Transaction types now use null unions per CLAUDE.md rules, userService creates null fields
+- **theme:** added colors.white, replaced all 25+ hardcoded '#FFFFFF' instances across codebase
+- **react-native-paper Text:** replaced with RN Text in 4 screens, fixed typography spread bugs
+- **shared utilities:** created batchInQuery (src/utils/firestore.ts), useAsyncData (src/hooks/useAsyncData.ts)
+- **form deduplication:** extracted ListingForm component, CreateListingScreen (517->46 lines), EditItemScreen (464->92 lines)
+- **hook refactoring:** useListings, useTransactions, useConversations now use useAsyncData
+- **service refactoring:** listingService and friendService now use batchInQuery helper
+- **navigation cleanup:** shared messaging screens (Conversations, Chat, ComingSoon) extracted to addMessagingScreens helper
+- **placeholder screens:** MapScreen and NotificationsScreen simplified to use EmptyState, non-functional filter tags removed from ProfileScreen
+- **ProfileHeader:** replaced hardcoded mock stats (54, 2365, 2481) with 0 defaults
+- **CLAUDE.md:** removed non-existent closetService/useClosets references, added new patterns
+
+## status as of session 7 (2026-02-16)
 - **working:** listing creation, auth, all screens on firebase, transaction flow
 - **deployed:** firestore.rules, firestore.indexes.json, dotenv
-- **needs testing:** all session 5 changes on device
+- **needs testing:** all refactoring changes on device
 - **known limitation:** Alert.prompt iOS-only
 - **deferred:** firebase storage (paid plan), phone auth, push notifications
-- **mock data:** preserved in src/services/mock/ for reference (still uses `Board` type)

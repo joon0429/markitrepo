@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, FlatList, Alert, ScrollView, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, FlatList, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ProfileStackParamList } from '@navigation/types';
@@ -9,14 +9,13 @@ import ClosetCard from '@components/profile/ClosetCard';
 import LoadingSpinner from '@components/common/LoadingSpinner';
 import EmptyState from '@components/common/EmptyState';
 import { useProfile } from '@hooks/useProfile';
-import { colors, spacing, typography } from '@constants/theme';
+import { colors, spacing } from '@constants/theme';
 
 type ProfileNavigationProp = StackNavigationProp<ProfileStackParamList, 'Profile'>;
 
 export default function ProfileScreen() {
   const navigation = useNavigation<ProfileNavigationProp>();
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTag, setActiveTag] = useState('tag1');
 
   const { profile, closets, stats, loading, error } = useProfile();
 
@@ -65,26 +64,6 @@ export default function ProfileScreen() {
           placeholder="search..."
         />
 
-        {/* filter tags */}
-        <View style={styles.tagsContainer}>
-          <TouchableOpacity
-            style={[styles.tag, activeTag === 'tag1' && styles.activeTag]}
-            onPress={() => setActiveTag('tag1')}
-          >
-            <Text style={[styles.tagText, activeTag === 'tag1' && styles.activeTagText]}>
-              tag1
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tag, activeTag === 'tag2' && styles.activeTag]}
-            onPress={() => setActiveTag('tag2')}
-          >
-            <Text style={[styles.tagText, activeTag === 'tag2' && styles.activeTagText]}>
-              tag2
-            </Text>
-          </TouchableOpacity>
-        </View>
-
         {/* closets grid */}
         {closets.length === 0 ? (
           <EmptyState
@@ -117,29 +96,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-  },
-  tagsContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    gap: spacing.sm,
-  },
-  tag: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: 20,
-    backgroundColor: colors.surface,
-  },
-  activeTag: {
-    backgroundColor: colors.primary,
-  },
-  tagText: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text,
-  },
-  activeTagText: {
-    color: '#FFFFFF',
   },
   closetsListContent: {
     paddingHorizontal: spacing.xs,

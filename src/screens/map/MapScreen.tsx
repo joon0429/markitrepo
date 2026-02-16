@@ -1,13 +1,16 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing, typography } from '@constants/theme';
+import { View, StyleSheet } from 'react-native';
+import EmptyState from '@components/common/EmptyState';
+import { colors } from '@constants/theme';
 
 export default function MapScreen() {
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.placeholder}>map view coming soon</Text>
-      </View>
+      <EmptyState
+        icon="map-outline"
+        title="map view coming soon"
+        description="browse listings near you"
+      />
     </View>
   );
 }
@@ -16,15 +19,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-  },
-  content: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xl,
-  },
-  placeholder: {
-    fontSize: typography.fontSize.md,
-    color: colors.textSecondary,
   },
 });

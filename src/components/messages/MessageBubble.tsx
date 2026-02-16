@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     lineHeight: typography.fontSize.md * 1.4,
   },
   ownText: {
-    color: '#FFFFFF',
+    color: colors.white,
   },
   otherText: {
     color: colors.text,

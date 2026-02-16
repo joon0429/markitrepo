@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     fontSize: 32,
-    color: '#FFFFFF',
+    color: colors.white,
     lineHeight: 32,
   },
 });

@@ -15,6 +15,7 @@ export const colors = {
 
   border: '#2C2C2C',
   divider: '#1A1A1A',
+  white: '#FFFFFF',
 
   success: '#81C784',
   warning: '#FFB74D',

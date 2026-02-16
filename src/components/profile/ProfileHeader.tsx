@@ -22,15 +22,15 @@ export default function ProfileHeader({ user, stats, isOwnProfile, onAddFriend, 
 
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{stats.listingCount || 54}</Text>
+            <Text style={styles.statNumber}>{stats.listingCount || 0}</Text>
             <Text style={styles.statLabel}>items</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{stats.followersCount || 2365}</Text>
+            <Text style={styles.statNumber}>{stats.followersCount || 0}</Text>
             <Text style={styles.statLabel}>followers</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{stats.followingCount || 2481}</Text>
+            <Text style={styles.statNumber}>{stats.followingCount || 0}</Text>
             <Text style={styles.statLabel}>following</Text>
           </View>
         </View>
@@ -132,6 +132,6 @@ const styles = StyleSheet.create({
   addFriendText: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.semibold,
-    color: '#FFFFFF',
+    color: colors.white,
   },
 });

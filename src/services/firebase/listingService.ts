@@ -3,7 +3,6 @@ import {
   getDoc,
   setDoc,
   updateDoc,
-  deleteDoc,
   collection,
   query,
   where,
@@ -17,6 +16,7 @@ import {
 import { db } from './config';
 import { Listing, CreateListingInput, UpdateListingInput, ListingStatus } from '@types';
 import { buildTransactionData, addTransactionToBatch } from './transactionService';
+import { batchInQuery } from '@utils/firestore';
 
 // create a new listing
 export async function createListing(
@@ -24,11 +24,7 @@ export async function createListing(
   username: string,
   input: CreateListingInput
 ): Promise<string> {
-  console.log('[listingService] createListing called with:', { userId, username, input });
-
   const listingRef = doc(collection(db, 'listings'));
-  console.log('[listingService] created doc reference:', listingRef.id);
-
   const now = Timestamp.now();
 
   const listing: Listing = {
@@ -52,16 +48,7 @@ export async function createListing(
     buyerId: null,
   };
 
-  console.log('[listingService] about to call setDoc with listing:', listing);
-
-  try {
-    await setDoc(listingRef, listing);
-    console.log('[listingService] setDoc SUCCESS! listing id:', listingRef.id);
-  } catch (error) {
-    console.error('[listingService] setDoc FAILED:', error);
-    throw error;
-  }
-
+  await setDoc(listingRef, listing);
   return listingRef.id;
 }
 
@@ -90,43 +77,22 @@ export async function getUserListings(
 }
 
 // get feed listings for a list of friend IDs
-// firestore 'in' queries are limited to 30 values, so we batch if needed
 export async function getFeedListings(
   friendIds: string[],
   visibility: 'friends' | 'friends_plus'
 ): Promise<Listing[]> {
   if (friendIds.length === 0) return [];
 
-  const results: Listing[] = [];
-
-  // batch into groups of 30 (firestore 'in' query limit)
-  for (let i = 0; i < friendIds.length; i += 30) {
-    const batch = friendIds.slice(i, i + 30);
-
-    if (visibility === 'friends') {
-      // friends tab: only 'friends' visibility from direct friends
-      const q = query(
-        collection(db, 'listings'),
-        where('sellerId', 'in', batch),
-        where('visibility', '==', 'friends'),
-        where('status', '==', 'available'),
-        orderBy('createdAt', 'desc')
-      );
-      const snap = await getDocs(q);
-      results.push(...snap.docs.map(d => d.data() as Listing));
-    } else {
-      // friends+ tab: 'friends_plus' visibility listings
-      const q = query(
-        collection(db, 'listings'),
-        where('sellerId', 'in', batch),
-        where('visibility', '==', 'friends_plus'),
-        where('status', '==', 'available'),
-        orderBy('createdAt', 'desc')
-      );
-      const snap = await getDocs(q);
-      results.push(...snap.docs.map(d => d.data() as Listing));
-    }
-  }
+  const results = await batchInQuery<Listing>(
+    'listings',
+    'sellerId',
+    friendIds,
+    [
+      where('visibility', '==', visibility),
+      where('status', '==', 'available'),
+      orderBy('createdAt', 'desc'),
+    ]
+  );
 
   // sort by createdAt desc (batches may have interleaved results)
   results.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());

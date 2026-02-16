@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
+  Text,
   StyleSheet,
   FlatList,
   RefreshControl,
   TouchableOpacity,
 } from 'react-native';
-import { Text } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ProfileStackParamList } from '@navigation/types';
@@ -37,7 +37,7 @@ export default function ArchivedListingsScreen() {
       const results = await getArchivedListings(user.uid);
       setListings(results);
     } catch (err) {
-      console.error('failed to load archived listings:', err);
+      // silently handle error
     } finally {
       setLoading(false);
     }
@@ -63,7 +63,7 @@ export default function ArchivedListingsScreen() {
       // Remove from local state
       setListings((prev) => prev.filter((l) => l.id !== listingId));
     } catch (err) {
-      console.error('failed to unarchive:', err);
+      // silently handle error
     }
   };
 
@@ -140,13 +140,13 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   headerText: {
-    ...typography.h3,
+    fontSize: typography.fontSize.lg,
     color: colors.text,
-    fontWeight: '700',
+    fontWeight: typography.fontWeight.bold,
     marginBottom: spacing.xs,
   },
   itemCount: {
-    ...typography.caption,
+    fontSize: typography.fontSize.xs,
     color: colors.textSecondary,
   },
   listContent: {
@@ -167,8 +167,8 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
   },
   unarchiveText: {
-    ...typography.caption,
+    fontSize: typography.fontSize.xs,
     color: colors.primary,
-    fontWeight: '600',
+    fontWeight: typography.fontWeight.semibold,
   },
 });

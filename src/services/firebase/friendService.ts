@@ -1,7 +1,6 @@
 import {
   doc,
   getDoc,
-  setDoc,
   updateDoc,
   collection,
   query,
@@ -14,6 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './config';
 import { User, FriendRequest, Friend, FriendRequestWithMutuals } from '@types';
+import { batchInQuery } from '@utils/firestore';
 
 // get friend profiles from a user's friendIds array
 export async function getFriends(userId: string): Promise<Friend[]> {
@@ -25,36 +25,22 @@ export async function getFriends(userId: string): Promise<Friend[]> {
   const friendIds = user.friendIds || [];
   if (friendIds.length === 0) return [];
 
-  const friends: Friend[] = [];
+  const friendUsers = await batchInQuery<User>('users', 'uid', friendIds);
 
-  // fetch each friend's profile (batch in groups of 30 for 'in' queries)
-  for (let i = 0; i < friendIds.length; i += 30) {
-    const batch = friendIds.slice(i, i + 30);
-    const q = query(
-      collection(db, 'users'),
-      where('uid', 'in', batch)
-    );
-    const snap = await getDocs(q);
+  return friendUsers.map(friendData => {
+    const mutualCount = friendData.friendIds.filter(
+      fid => user.friendIds.includes(fid) && fid !== userId
+    ).length;
 
-    for (const friendDoc of snap.docs) {
-      const friendData = friendDoc.data() as User;
-      // count mutual friends
-      const mutualCount = friendData.friendIds.filter(
-        fid => user.friendIds.includes(fid) && fid !== userId
-      ).length;
-
-      friends.push({
-        uid: friendData.uid,
-        username: friendData.username,
-        displayName: friendData.displayName,
-        photoURL: friendData.photoURL,
-        mutualFriendsCount: mutualCount,
-        friendsSince: new Date(), // could be stored on accept, using now as placeholder
-      });
-    }
-  }
-
-  return friends;
+    return {
+      uid: friendData.uid,
+      username: friendData.username,
+      displayName: friendData.displayName,
+      photoURL: friendData.photoURL,
+      mutualFriendsCount: mutualCount,
+      friendsSince: new Date(),
+    };
+  });
 }
 
 // get pending friend requests for a user

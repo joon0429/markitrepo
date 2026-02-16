@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   sendButtonText: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.semibold,
-    color: '#FFFFFF',
+    color: colors.white,
   },
   sendButtonTextDisabled: {
     color: colors.textTertiary,

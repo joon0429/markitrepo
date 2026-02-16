@@ -1,13 +1,13 @@
 import React from 'react';
 import {
   View,
+  Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
   Image,
   RefreshControl,
 } from 'react-native';
-import { Text } from 'react-native-paper';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ProfileStackParamList } from '@navigation/types';
@@ -166,24 +166,24 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   itemTitle: {
-    ...typography.bodyLarge,
+    fontSize: typography.fontSize.md,
     color: colors.text,
-    fontWeight: '600',
+    fontWeight: typography.fontWeight.semibold,
   },
   otherUser: {
-    ...typography.body,
+    fontSize: typography.fontSize.sm,
     color: colors.textSecondary,
   },
   transactionDate: {
-    ...typography.caption,
+    fontSize: typography.fontSize.xs,
     color: colors.textSecondary,
   },
   priceContainer: {
     alignItems: 'flex-end',
   },
   price: {
-    ...typography.h4,
+    fontSize: typography.fontSize.lg,
     color: colors.primary,
-    fontWeight: '700',
+    fontWeight: typography.fontWeight.bold,
   },
 });

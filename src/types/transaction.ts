@@ -4,10 +4,10 @@ export interface Transaction {
   id: string;
   buyerId: string;
   buyerUsername: string;         // Denormalized for display
-  buyerPhotoURL?: string;        // Denormalized for display
+  buyerPhotoURL: string | null;  // Denormalized for display
   sellerId: string;
   sellerUsername: string;        // Denormalized for display
-  sellerPhotoURL?: string;       // Denormalized for display
+  sellerPhotoURL: string | null;  // Denormalized for display
   listingId: string;             // Reference to original listing
 
   // Snapshot data at time of sale (immutable record)

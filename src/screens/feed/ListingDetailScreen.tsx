@@ -250,7 +250,7 @@ export default function ListingDetailScreen() {
             <Ionicons
               name={isMarked ? 'bookmark' : 'bookmark-outline'}
               size={18}
-              color={isSold || isArchived ? colors.textSecondary : isMarked ? colors.text : '#FFFFFF'}
+              color={isSold || isArchived ? colors.textSecondary : isMarked ? colors.text : colors.white}
             />
             <Text
               style={[
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
   soldBadgeText: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.bold,
-    color: '#FFFFFF',
+    color: colors.white,
     textTransform: 'uppercase',
   },
   shareButton: {
@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
   markButtonText: {
     fontSize: typography.fontSize.md,
     fontWeight: typography.fontWeight.semibold,
-    color: '#FFFFFF',
+    color: colors.white,
   },
   markButtonTextActive: {
     color: colors.text,

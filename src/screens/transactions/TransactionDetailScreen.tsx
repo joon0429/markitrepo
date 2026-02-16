@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView, Image } from 'react-native';
-import { Text } from 'react-native-paper';
+import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { ProfileStackParamList } from '@navigation/types';
 import { deserializeTransaction } from '@types';
@@ -129,7 +128,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   sectionTitle: {
-    ...typography.caption,
+    fontSize: typography.fontSize.xs,
     color: colors.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 1,
@@ -141,12 +140,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   itemTitle: {
-    ...typography.h3,
+    fontSize: typography.fontSize.lg,
     color: colors.text,
-    fontWeight: '700',
+    fontWeight: typography.fontWeight.bold,
   },
   itemDescription: {
-    ...typography.body,
+    fontSize: typography.fontSize.sm,
     color: colors.textSecondary,
     lineHeight: 20,
   },
@@ -154,13 +153,13 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   itemCloset: {
-    ...typography.caption,
+    fontSize: typography.fontSize.xs,
     color: colors.textSecondary,
   },
   price: {
-    ...typography.h2,
+    fontSize: typography.fontSize.xl,
     color: colors.primary,
-    fontWeight: '700',
+    fontWeight: typography.fontWeight.bold,
     padding: spacing.md,
     backgroundColor: colors.surface,
     borderRadius: 8,
@@ -177,18 +176,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   username: {
-    ...typography.bodyLarge,
+    fontSize: typography.fontSize.md,
     color: colors.text,
   },
   date: {
-    ...typography.body,
+    fontSize: typography.fontSize.sm,
     color: colors.text,
     padding: spacing.md,
     backgroundColor: colors.surface,
     borderRadius: 8,
   },
   transactionId: {
-    ...typography.caption,
+    fontSize: typography.fontSize.xs,
     color: colors.textSecondary,
     fontFamily: 'monospace',
     padding: spacing.md,
