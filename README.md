@@ -17,17 +17,6 @@ built with React Native (Expo), TypeScript, and Firebase.
 | navigation | React Navigation v6 |
 | UI | react-native-paper (Material Design, dark mode) |
 
-## features
-
-- **auth** -- email/password login and signup
-- **profiles** -- name, username, bio, city, custom closets (pinterest-style grid)
-- **friends** -- username search, friend requests, friends vs friends+ visibility
-- **listings** -- 1-4 photos, closet assignment, friends/friends+ privacy toggle
-- **feed** -- friends / friends+ tabs (BeReal-style), category filtering
-- **mark it** -- soft reservation system; sellers see who marked their items
-- **messaging** -- real-time chat, one conversation per user pair
-- **transactions** -- mark as sold flow, purchase/sales history, archived listings
-
 ## project structure
 
 ```
@@ -64,10 +53,6 @@ requires a firebase project with Auth, Firestore, and Storage enabled. see `.env
 - `firebase/firestore.indexes.json` -- composite indexes for queries
 - `firebase.json` -- firebase project config
 - `scripts/seed.ts` -- test data seeder (needs user UIDs)
-
-## design
-
-dark mode only. background `#121212`, surface `#1E1E1E`, primary `#BB86FC`, white text. icons from Ionicons. system fonts.
 
 ## status
 
