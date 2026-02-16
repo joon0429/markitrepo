@@ -1,21 +1,23 @@
-Review our current conversation and update the CLAUDE.md file with any new:
+update project docs based on this session's work. read CLAUDE.md and DEVLOG.md first, then make minimal targeted edits:
 
-1. **Design decisions** - UI/UX patterns, interaction choices, visual design rules
-2. **Technical decisions** - Architecture, libraries, code conventions
-3. **Lessons learned** - Bugs fixed, mistakes to avoid, gotchas discovered
-4. **Current context** - What we're working on, priorities, parking lot items
+**CLAUDE.md** -- only update if this session produced:
+- new hard rules or constraints
+- new architecture/pattern decisions
+- new lessons learned (add to appropriate category)
+- changed priorities or status
 
-Instructions:
-- Read the current CLAUDE.md file first
-- Add new information to the appropriate sections
-- **YOU DO NOT NEED TO UPDATE EVERY SECTION. ONLY APPROPRIATE AND MINIMAL CHANGES**
-- Update the "Last updated" date at the top
-- Use the existing table/list formats
-- Do NOT remove existing content unless it's outdated
-- If adding to "Lessons Learned" or "Technical Decisions" tables, include today's date
-- Summarize what you added after updating
-- **REVIEW ALL TOUCHPOINTS AND MAKE CONTEXTUAL EDITS FOR OUTDATED, MOOT, OR REDUNDANT INFORMATION**
+**DEVLOG.md** -- only update if this session produced:
+- completed work (add new phase or append to current phase)
+- changed project status (update the status block at the bottom)
 
-If the user provided specific context with this command, prioritize saving that information.
+rules:
+- do NOT rewrite sections that haven't changed
+- do NOT add redundant info already captured elsewhere
+- do NOT remove existing content unless it's provably outdated
+- update the "last updated" date in CLAUDE.md if you change it
+- keep lessons learned categorized (firestore / react native / UI-UX / codebase)
+- summarize what you changed after updating
+
+if the user provided specific context with this command, prioritize saving that.
 
 $ARGUMENTS
