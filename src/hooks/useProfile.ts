@@ -60,9 +60,13 @@ export function useProfile(userId?: string) {
   const closets: Closet[] = computeClosets(listings, targetUserId || '');
 
   // compute stats
+  const friendCount = profile?.friendIds?.length || 0;
   const stats: UserStats = {
     listingCount: listings.length,
-    friendCount: profile?.friendIds?.length || 0,
+    friendCount,
+    followersCount: friendCount,
+    followingCount: friendCount,
+    pendingRequestCount: profile?.pendingFriendRequests?.length || 0,
     purchaseCount: purchases.length,
     salesCount: sales.length,
   };

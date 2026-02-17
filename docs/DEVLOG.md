@@ -100,9 +100,26 @@
 - **ProfileHeader:** replaced hardcoded mock stats (54, 2365, 2481) with 0 defaults
 - **CLAUDE.md:** removed non-existent closetService/useClosets references, added new patterns
 
-## status as of session 7 (2026-02-16)
-- **working:** listing creation, auth, all screens on firebase, transaction flow
+## phase 13: friends UI + icon migration (2026-02-16, session 8)
+- **friends screen:** FriendsScreen rewritten with instagram-style followers/following material-top-tabs
+- **navigation:** friends accessible from profile by tapping follower/following counts (initialTab param)
+- **friend requests:** inline row at top of followers tab (avatar stack + count + chevron), navigates to dedicated FriendRequestsScreen
+- **FriendRequestItem:** restyled with confirm/delete buttons side by side, "followed by X mutual friends" text
+- **FriendListItem:** simplified for MVP (username + displayName, no message button)
+- **add friends:** new AddFriendsScreen with username search, send request, friends/requested badges
+- **UserStats:** added followersCount, followingCount, pendingRequestCount (both = friendCount for mutual model)
+- **ProfileHeader:** followers/following counts now tappable (TouchableOpacity with callbacks)
+- **icon migration:** replaced all Ionicons (@expo/vector-icons) with lucide-react-native across entire codebase
+- **EmptyState:** icon prop changed from string to ReactNode (lucide components passed directly)
+- **bottom tabs:** added tabBarIcon to all 5 tabs (Home, Bell, PlusCircle, MapPin, User)
+- **logout fix:** removed setLoading(true) from signOut (was unmounting entire nav tree)
+- **tab label fix:** removed conflicting color in tabBarLabelStyle, use tint color props only
+- **needs install:** lucide-react-native + react-native-svg (code updated, deps not yet installed in WSL)
+
+## status as of session 8 (2026-02-16)
+- **working:** listing creation, auth, all screens on firebase, transaction flow, friends UI
 - **deployed:** firestore.rules, firestore.indexes.json, dotenv
-- **needs testing:** all refactoring changes on device
+- **needs testing:** friends screens, lucide icon migration, logout fix
+- **needs install:** lucide-react-native + react-native-svg in WSL
 - **known limitation:** Alert.prompt iOS-only
 - **deferred:** firebase storage (paid plan), phone auth, push notifications

@@ -4,7 +4,7 @@ import { useRoute, RouteProp, useNavigation, CompositeNavigationProp } from '@re
 import { StackNavigationProp } from '@react-navigation/stack';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { FeedStackParamList, MainTabParamList, RootStackParamList } from '@navigation/types';
-import { Ionicons } from '@expo/vector-icons';
+import { Share2, Bookmark, CheckCircle, Archive, Send, X, ChevronRight } from 'lucide-react-native';
 import PhotoCarousel from '@components/listings/PhotoCarousel';
 import Avatar from '@components/common/Avatar';
 import { useListingDetail } from '@hooks/useListingDetail';
@@ -179,7 +179,7 @@ export default function ListingDetailScreen() {
               )}
             </View>
             <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
-              <Ionicons name="share-outline" size={22} color={colors.text} />
+              <Share2 size={22} color={colors.text} />
             </TouchableOpacity>
           </View>
 
@@ -196,7 +196,7 @@ export default function ListingDetailScreen() {
           {/* marked by count */}
           {markCount > 0 && (
             <View style={styles.markCount}>
-              <Ionicons name="bookmark" size={18} color={colors.primary} />
+              <Bookmark size={18} color={colors.primary} fill={colors.primary} />
               <Text style={styles.markText}>
                 {markCount} {markCount === 1 ? 'person' : 'people'} marked it!
               </Text>
@@ -214,7 +214,7 @@ export default function ListingDetailScreen() {
                   style={styles.sellerActionButton}
                   onPress={handleShowBuyerModal}
                 >
-                  <Ionicons name="checkmark-circle-outline" size={20} color={colors.primary} />
+                  <CheckCircle size={20} color={colors.primary} />
                   <Text style={styles.sellerActionText}>mark as sold</Text>
                 </TouchableOpacity>
               )}
@@ -223,7 +223,7 @@ export default function ListingDetailScreen() {
                   style={styles.sellerActionButton}
                   onPress={handleArchive}
                 >
-                  <Ionicons name="archive-outline" size={20} color={colors.textSecondary} />
+                  <Archive size={20} color={colors.textSecondary} />
                   <Text style={styles.sellerActionText}>archive</Text>
                 </TouchableOpacity>
               )}
@@ -247,10 +247,10 @@ export default function ListingDetailScreen() {
             activeOpacity={0.8}
             disabled={isSold || isArchived}
           >
-            <Ionicons
-              name={isMarked ? 'bookmark' : 'bookmark-outline'}
+            <Bookmark
               size={18}
               color={isSold || isArchived ? colors.textSecondary : isMarked ? colors.text : colors.white}
+              fill={isMarked ? (isSold || isArchived ? colors.textSecondary : colors.text) : 'none'}
             />
             <Text
               style={[
@@ -269,7 +269,7 @@ export default function ListingDetailScreen() {
             activeOpacity={0.8}
           >
             <Text style={styles.messageButtonText}>send message</Text>
-            <Ionicons name="send-outline" size={16} color={colors.text} />
+            <Send size={16} color={colors.text} />
           </TouchableOpacity>
         </View>
       )}
@@ -286,7 +286,7 @@ export default function ListingDetailScreen() {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>select buyer</Text>
               <TouchableOpacity onPress={() => setShowBuyerModal(false)}>
-                <Ionicons name="close" size={24} color={colors.text} />
+                <X size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
 
@@ -308,7 +308,7 @@ export default function ListingDetailScreen() {
                         <Text style={styles.buyerDisplayName}>{item.displayName}</Text>
                       )}
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+                    <ChevronRight size={20} color={colors.textSecondary} />
                   </TouchableOpacity>
                 )}
               />

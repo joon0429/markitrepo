@@ -6,6 +6,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { Listing, serializeListing } from '@types';
 import { FeedStackParamList } from '@navigation/types';
 import { useListings } from '@hooks/useListings';
+import { Tag } from 'lucide-react-native';
 import ListingCard from '@components/listings/ListingCard';
 import LoadingSpinner from '@components/common/LoadingSpinner';
 import EmptyState from '@components/common/EmptyState';
@@ -35,7 +36,7 @@ function FeedList({ visibility }: { visibility: 'friends' | 'friends_plus' }) {
     return (
       <View style={styles.container}>
         <EmptyState
-          icon="pricetag-outline"
+          icon={<Tag size={64} color={colors.textTertiary} />}
           title="no listings yet"
           description={visibility === 'friends' ? 'add friends to see their listings here' : 'no second connection listings!'}
         />

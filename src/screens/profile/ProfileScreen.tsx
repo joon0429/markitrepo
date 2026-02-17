@@ -6,6 +6,7 @@ import { ProfileStackParamList } from '@navigation/types';
 import ProfileHeader from '@components/profile/ProfileHeader';
 import SearchBar from '@components/common/SearchBar';
 import ClosetCard from '@components/profile/ClosetCard';
+import { User, LayoutGrid } from 'lucide-react-native';
 import LoadingSpinner from '@components/common/LoadingSpinner';
 import EmptyState from '@components/common/EmptyState';
 import { useProfile } from '@hooks/useProfile';
@@ -38,7 +39,7 @@ export default function ProfileScreen() {
     return (
       <View style={styles.container}>
         <EmptyState
-          icon="person-outline"
+          icon={<User size={64} color={colors.textTertiary} />}
           title="profile not found"
           description={error || 'could not load your profile'}
         />
@@ -55,6 +56,8 @@ export default function ProfileScreen() {
           stats={stats}
           isOwnProfile={true}
           onEditProfile={handleEditProfile}
+          onFollowersPress={() => navigation.navigate('Friends', { initialTab: 'followers' })}
+          onFollowingPress={() => navigation.navigate('Friends', { initialTab: 'following' })}
         />
 
         {/* search bar */}
@@ -67,7 +70,7 @@ export default function ProfileScreen() {
         {/* closets grid */}
         {closets.length === 0 ? (
           <EmptyState
-            icon="grid-outline"
+            icon={<LayoutGrid size={64} color={colors.textTertiary} />}
             title="no closets yet"
             description="create a listing to start organizing your items"
           />

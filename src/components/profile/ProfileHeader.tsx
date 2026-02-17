@@ -11,9 +11,19 @@ interface ProfileHeaderProps {
   isOwnProfile: boolean;
   onAddFriend?: () => void;
   onEditProfile?: () => void;
+  onFollowersPress?: () => void;
+  onFollowingPress?: () => void;
 }
 
-export default function ProfileHeader({ user, stats, isOwnProfile, onAddFriend, onEditProfile }: ProfileHeaderProps) {
+export default function ProfileHeader({
+  user,
+  stats,
+  isOwnProfile,
+  onAddFriend,
+  onEditProfile,
+  onFollowersPress,
+  onFollowingPress,
+}: ProfileHeaderProps) {
   return (
     <View style={styles.container}>
       {/* profile picture and stats row */}
@@ -25,14 +35,14 @@ export default function ProfileHeader({ user, stats, isOwnProfile, onAddFriend, 
             <Text style={styles.statNumber}>{stats.listingCount || 0}</Text>
             <Text style={styles.statLabel}>items</Text>
           </View>
-          <View style={styles.statItem}>
+          <TouchableOpacity style={styles.statItem} onPress={onFollowersPress} activeOpacity={0.7}>
             <Text style={styles.statNumber}>{stats.followersCount || 0}</Text>
             <Text style={styles.statLabel}>followers</Text>
-          </View>
-          <View style={styles.statItem}>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.statItem} onPress={onFollowingPress} activeOpacity={0.7}>
             <Text style={styles.statNumber}>{stats.followingCount || 0}</Text>
             <Text style={styles.statLabel}>following</Text>
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
 

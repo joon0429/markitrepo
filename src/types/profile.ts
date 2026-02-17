@@ -9,6 +9,9 @@ export interface Closet {
 
 export interface UserStats {
   friendCount: number;
+  followersCount: number;
+  followingCount: number;
+  pendingRequestCount: number;
   listingCount: number;
   purchaseCount: number;
   salesCount: number;

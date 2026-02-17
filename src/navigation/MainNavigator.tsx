@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { Ionicons } from '@expo/vector-icons';
+import { Plus, MessageCircle, Menu, Home, Bell, MapPin, User, PlusCircle } from 'lucide-react-native';
 import {
   MainTabParamList,
   FeedStackParamList,
@@ -28,6 +28,9 @@ import EditProfileScreen from '@screens/profile/EditProfileScreen';
 import ArchivedListingsScreen from '@screens/profile/ArchivedListingsScreen';
 import TransactionHistoryScreen from '@screens/transactions/TransactionHistoryScreen';
 import TransactionDetailScreen from '@screens/transactions/TransactionDetailScreen';
+import FriendsScreen from '@screens/friends/FriendsScreen';
+import FriendRequestsScreen from '@screens/friends/FriendRequestsScreen';
+import AddFriendsScreen from '@screens/friends/AddFriendsScreen';
 import { colors, typography } from '@constants/theme';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -67,7 +70,7 @@ function addMessagingScreens<T extends { Conversations: undefined; Chat: any; Co
               style={headerButtonStyles.headerButton}
               onPress={() => navigation.navigate('ComingSoon', { title: 'new message', description: 'start new conversations from here' })}
             >
-              <Ionicons name="add-outline" size={24} color={colors.text} />
+              <Plus size={24} color={colors.text} />
             </TouchableOpacity>
           ),
         })}
@@ -108,7 +111,7 @@ function FeedStackNavigator() {
               style={headerButtonStyles.headerButton}
               onPress={() => navigation.navigate('Conversations')}
             >
-              <Ionicons name="chatbubble-outline" size={22} color={colors.text} />
+              <MessageCircle size={22} color={colors.text} />
             </TouchableOpacity>
           ),
         })}
@@ -136,7 +139,7 @@ function NotificationsStackNavigator() {
               style={headerButtonStyles.headerButton}
               onPress={() => navigation.navigate('Conversations')}
             >
-              <Ionicons name="chatbubble-outline" size={22} color={colors.text} />
+              <MessageCircle size={22} color={colors.text} />
             </TouchableOpacity>
           ),
         })}
@@ -171,7 +174,7 @@ function ProfileStackNavigator() {
               style={headerButtonStyles.headerButton}
               onPress={() => navigation.navigate('Settings')}
             >
-              <Ionicons name="menu-outline" size={24} color={colors.text} />
+              <Menu size={24} color={colors.text} />
             </TouchableOpacity>
           ),
         })}
@@ -218,6 +221,21 @@ function ProfileStackNavigator() {
         component={TransactionDetailScreen}
         options={{ title: 'transaction' }}
       />
+      <ProfileStackNav.Screen
+        name="Friends"
+        component={FriendsScreen}
+        options={{ headerShown: false }}
+      />
+      <ProfileStackNav.Screen
+        name="FriendRequests"
+        component={FriendRequestsScreen}
+        options={{ title: 'friend requests' }}
+      />
+      <ProfileStackNav.Screen
+        name="AddFriends"
+        component={AddFriendsScreen}
+        options={{ title: 'add friends' }}
+      />
     </ProfileStackNav.Navigator>
   );
 }
@@ -239,7 +257,7 @@ function CreateTabButton(props: any) {
         navigation.navigate('CreateListing');
       }}
     >
-      <Text style={tabButtonStyles.createButtonText}>+</Text>
+      <PlusCircle size={28} color={colors.primary} />
       <Text style={tabButtonStyles.createButtonLabel}>create</Text>
     </TouchableOpacity>
   );
@@ -262,12 +280,18 @@ export default function MainNavigator() {
       <Tab.Screen
         name="FeedStack"
         component={FeedStackNavigator}
-        options={{ tabBarLabel: 'home' }}
+        options={{
+          tabBarLabel: 'home',
+          tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
+        }}
       />
       <Tab.Screen
         name="NotificationsStack"
         component={NotificationsStackNavigator}
-        options={{ tabBarLabel: 'notifs' }}
+        options={{
+          tabBarLabel: 'notifs',
+          tabBarIcon: ({ color, size }) => <Bell size={size} color={color} />,
+        }}
       />
       <Tab.Screen
         name="CreateTab"
@@ -280,12 +304,18 @@ export default function MainNavigator() {
       <Tab.Screen
         name="MapStack"
         component={MapStackNavigator}
-        options={{ tabBarLabel: 'map' }}
+        options={{
+          tabBarLabel: 'map',
+          tabBarIcon: ({ color, size }) => <MapPin size={size} color={color} />,
+        }}
       />
       <Tab.Screen
         name="ProfileStack"
         component={ProfileStackNavigator}
-        options={{ tabBarLabel: 'profile' }}
+        options={{
+          tabBarLabel: 'profile',
+          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
+        }}
       />
     </Tab.Navigator>
   );
@@ -297,15 +327,10 @@ const tabButtonStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  createButtonText: {
-    fontSize: 28,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.primary,
-    marginBottom: -4,
-  },
   createButtonLabel: {
     fontSize: typography.fontSize.xs,
     color: colors.primary,
+    marginTop: 2,
   },
 });
 

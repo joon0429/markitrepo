@@ -1,6 +1,6 @@
 # CLAUDE.md - mark.it
 
-> last updated: 2026-02-16 (session 7)
+> last updated: 2026-02-16 (session 8)
 
 ---
 
@@ -42,7 +42,7 @@
 ## design system
 
 **theme:** background #121212, surface #1E1E1E, primary #BB86FC, text #FFFFFF
-**icons:** Ionicons from @expo/vector-icons only (NEVER emoji)
+**icons:** lucide-react-native only (NEVER emoji, NEVER Ionicons)
 **fonts:** system (San Francisco / Roboto)
 **button text on primary bg:** always `'#FFFFFF'` (not colors.background)
 **placeholder images:** PlaceholderImage component (triangle icon)
@@ -82,6 +82,10 @@
 - **closet creation:** Alert.prompt (iOS-only -- needs cross-platform modal for Android)
 - **transaction flow:** mark as sold -> buyer selector modal (from markedBy list) -> atomic batch write -> success screen
 - **profile:** name/username/bio left-aligned stack, hamburger menu -> settings, pinterest-style closet grid
+- **profile stats:** tapping followers/following counts navigates to FriendsScreen with initialTab param
+- **friends screen:** instagram-style followers/following material-top-tabs, inline friend requests row at top of followers tab, person-add icon -> AddFriendsScreen
+- **friend requests:** dedicated FriendRequestsScreen with confirm/delete buttons side by side
+- **add friends:** search by username, send friend request, shows "friends"/"requested" status badges
 - **edit profile:** save navigates back immediately (no alert)
 
 ---
@@ -135,7 +139,7 @@ all in `src/services/firebase/`
 - after config changes: `npx expo start --clear` in WSL
 
 ### UI/UX rules
-- NEVER use emojis as icons -- Ionicons only
+- NEVER use emojis as icons -- lucide-react-native only (Ionicons removed)
 - headers via navigator screenOptions only, never custom in-screen
 - form counters below inputs, never above
 - never silently change user input -- show inline error
@@ -154,6 +158,9 @@ all in `src/services/firebase/`
 - markAsSold must use atomic batch (transaction doc + listing update)
 - empty closets persist (itemCount=0) -- don't auto-delete
 - closet stats: only count status='available' listings
+- EmptyState `icon` prop takes ReactNode (lucide component), not a string
+- signOut must NOT set loading=true (unmounts entire nav tree, breaks sign-out flow)
+- material-top-tabs: use `tabBarActiveTintColor`/`tabBarInactiveTintColor` -- do NOT also set `color` in `tabBarLabelStyle` (conflicts)
 
 ---
 
@@ -173,13 +180,15 @@ all in `src/services/firebase/`
 analytics, QR codes, reputation, search, maps, in-app payments, price edit notifications
 
 ### next steps
-1. **device testing** -- test session 5 changes on iPhone (listing creation, closets, dropdowns, transactions, archive)
-2. **seed data** -- run seed.ts (needs user UIDs updated)
-3. **cross-platform closet modal** -- replace iOS-only Alert.prompt
+1. **install deps in WSL** -- `npx expo install react-native-svg` + `npm install lucide-react-native`
+2. **device testing** -- test friends screens, add friends search, icon migration, logout
+3. **seed data** -- run seed.ts (needs user UIDs updated)
+4. **cross-platform closet modal** -- replace iOS-only Alert.prompt
 
 ### current status
-- **working:** auth, listing creation, all screens on firebase, transaction flow
-- **needs testing:** session 5 changes (listing creation, dropdown, closets, profile grid)
+- **working:** auth, listing creation, all screens on firebase, transaction flow, friends UI
+- **needs testing:** friends screens (followers/following/requests/add), lucide icon migration, logout fix
+- **needs install:** lucide-react-native + react-native-svg (not yet installed in WSL)
 - **deferred:** firebase storage (paid plan), phone auth, push notifications
 
 ---

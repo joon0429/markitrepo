@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@navigation/types';
+import { CheckCircle } from 'lucide-react-native';
 import EmptyState from '@components/common/EmptyState';
 import Button from '@components/common/Button';
 import { colors, spacing } from '@constants/theme';
@@ -23,7 +24,7 @@ export default function ListingConfirmScreen() {
     <View style={styles.container}>
       <View style={styles.content}>
         <EmptyState
-          icon="checkmark-circle-outline"
+          icon={<CheckCircle size={64} color={colors.textTertiary} />}
           title="listing created!"
           description="your item is now visible to your network"
         />

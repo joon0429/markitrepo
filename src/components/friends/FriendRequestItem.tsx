@@ -13,22 +13,26 @@ interface FriendRequestItemProps {
 export default function FriendRequestItem({ request, onAccept, onDecline }: FriendRequestItemProps) {
   return (
     <View style={styles.container}>
-      <Avatar uri={request.fromPhotoURL} size="medium" name={request.fromUsername} />
+      <Avatar uri={request.fromPhotoURL} size="large" name={request.fromUsername} />
 
-      <View style={styles.info}>
-        <Text style={styles.username}>{request.fromUsername}</Text>
-        <Text style={styles.mutualFriends}>
-          {request.mutualFriendsCount} mutual {request.mutualFriendsCount === 1 ? 'friend' : 'friends'}
-        </Text>
-      </View>
+      <View style={styles.content}>
+        <View style={styles.info}>
+          <Text style={styles.displayName}>{request.fromUsername}</Text>
+          {request.mutualFriendsCount > 0 && (
+            <Text style={styles.mutualText}>
+              followed by {request.mutualFriendsCount} mutual {request.mutualFriendsCount === 1 ? 'friend' : 'friends'}
+            </Text>
+          )}
+        </View>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.acceptButton} onPress={onAccept} activeOpacity={0.7}>
-          <Text style={styles.acceptButtonText}>accept</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.declineButton} onPress={onDecline} activeOpacity={0.7}>
-          <Text style={styles.declineButtonText}>decline</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity style={styles.confirmButton} onPress={onAccept} activeOpacity={0.7}>
+            <Text style={styles.confirmButtonText}>confirm</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.deleteButton} onPress={onDecline} activeOpacity={0.7}>
+            <Text style={styles.deleteButtonText}>delete</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -41,47 +45,50 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     backgroundColor: colors.background,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
   },
-  info: {
+  content: {
     flex: 1,
     marginLeft: spacing.md,
   },
-  username: {
-    fontSize: typography.fontSize.md,
-    fontWeight: typography.fontWeight.semibold,
-    color: colors.text,
-    marginBottom: spacing.xs / 2,
+  info: {
+    marginBottom: spacing.sm,
   },
-  mutualFriends: {
+  displayName: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text,
+  },
+  mutualText: {
     fontSize: typography.fontSize.sm,
     color: colors.textSecondary,
+    marginTop: 2,
   },
-  buttonContainer: {
+  buttonRow: {
+    flexDirection: 'row',
     gap: spacing.sm,
   },
-  acceptButton: {
-    paddingHorizontal: spacing.md,
+  confirmButton: {
+    flex: 1,
     paddingVertical: spacing.sm,
     backgroundColor: colors.primary,
     borderRadius: borderRadius.md,
+    alignItems: 'center',
   },
-  acceptButtonText: {
+  confirmButtonText: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.bold,
     color: colors.white,
   },
-  declineButton: {
-    paddingHorizontal: spacing.md,
+  deleteButton: {
+    flex: 1,
     paddingVertical: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.textTertiary,
+    backgroundColor: colors.surface,
     borderRadius: borderRadius.md,
+    alignItems: 'center',
   },
-  declineButtonText: {
+  deleteButtonText: {
     fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
-    color: colors.textSecondary,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text,
   },
 });

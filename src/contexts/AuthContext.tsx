@@ -81,14 +81,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    setLoading(true);
     setError(null);
     try {
       await firebaseSignOut(auth);
       setUserProfile(null);
     } catch (err: any) {
       setError('failed to sign out');
-      setLoading(false);
       throw err;
     }
   };

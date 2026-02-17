@@ -59,6 +59,9 @@ export type ProfileStackParamList = {
   ArchivedListings: undefined;
   TransactionHistory: { type: 'purchases' | 'sales' };
   TransactionDetail: { transaction: SerializableTransaction };
+  Friends: { initialTab?: 'followers' | 'following' };
+  FriendRequests: undefined;
+  AddFriends: undefined;
 };
 
 // navigation prop types

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { Ionicons } from '@expo/vector-icons';
+import { ChevronRight } from 'lucide-react-native';
 import { ProfileStackParamList } from '@navigation/types';
 import { useAuth } from '@contexts/AuthContext';
 import { colors, spacing, typography } from '@constants/theme';
@@ -115,7 +115,7 @@ export default function SettingsScreen() {
             {row.label}
           </Text>
           {!row.isLogout && (
-            <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
+            <ChevronRight size={20} color={colors.textTertiary} />
           )}
         </TouchableOpacity>
       ))}

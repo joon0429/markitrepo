@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { MessageSquare } from 'lucide-react-native';
 import ConversationListItem from '@components/messages/ConversationListItem';
 import EmptyState from '@components/common/EmptyState';
 import LoadingSpinner from '@components/common/LoadingSpinner';
@@ -37,7 +38,7 @@ export default function ConversationsScreen() {
     return (
       <View style={styles.container}>
         <EmptyState
-          icon="chatbubbles-outline"
+          icon={<MessageSquare size={64} color={colors.textTertiary} />}
           title="no messages yet"
           description="start a conversation by marking a listing"
         />

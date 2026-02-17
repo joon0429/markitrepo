@@ -5,6 +5,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@navigation/types';
 import { getTransaction } from '@services/firebase/transactionService';
 import { Transaction } from '@types';
+import { AlertCircle, CheckCircle } from 'lucide-react-native';
 import EmptyState from '@components/common/EmptyState';
 import Button from '@components/common/Button';
 import LoadingSpinner from '@components/common/LoadingSpinner';
@@ -63,7 +64,7 @@ export default function TransactionSuccessScreen() {
     return (
       <View style={styles.container}>
         <EmptyState
-          icon="alert-circle-outline"
+          icon={<AlertCircle size={64} color={colors.textTertiary} />}
           title="transaction not found"
           description="unable to load transaction details"
         />
@@ -76,7 +77,7 @@ export default function TransactionSuccessScreen() {
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
         <View style={styles.successSection}>
           <EmptyState
-            icon="checkmark-circle-outline"
+            icon={<CheckCircle size={64} color={colors.textTertiary} />}
             title="item sold!"
             description="transaction completed successfully"
           />

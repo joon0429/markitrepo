@@ -14,6 +14,7 @@ import { ProfileStackParamList } from '@navigation/types';
 import { useAuth } from '@contexts/AuthContext';
 import { useTransactions } from '@hooks/useTransactions';
 import { Transaction, serializeTransaction } from '@types';
+import { AlertCircle, Receipt } from 'lucide-react-native';
 import EmptyState from '@components/common/EmptyState';
 import LoadingSpinner from '@components/common/LoadingSpinner';
 import PlaceholderImage from '@components/common/PlaceholderImage';
@@ -90,7 +91,7 @@ export default function TransactionHistoryScreen() {
     return (
       <View style={styles.container}>
         <EmptyState
-          icon="alert-circle-outline"
+          icon={<AlertCircle size={64} color={colors.textTertiary} />}
           title="error loading transactions"
           description={error}
         />
@@ -102,7 +103,7 @@ export default function TransactionHistoryScreen() {
     return (
       <View style={styles.container}>
         <EmptyState
-          icon="receipt-outline"
+          icon={<Receipt size={64} color={colors.textTertiary} />}
           title={type === 'purchases' ? 'no purchases yet' : 'no sales yet'}
           description={
             type === 'purchases'

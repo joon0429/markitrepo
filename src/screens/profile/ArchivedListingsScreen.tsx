@@ -12,6 +12,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { ProfileStackParamList } from '@navigation/types';
 import { useAuth } from '@contexts/AuthContext';
 import { getArchivedListings, unarchiveListing } from '@services/firebase/listingService';
+import { Archive } from 'lucide-react-native';
 import ListingCard from '@components/listings/ListingCard';
 import LoadingSpinner from '@components/common/LoadingSpinner';
 import EmptyState from '@components/common/EmptyState';
@@ -75,7 +76,7 @@ export default function ArchivedListingsScreen() {
     return (
       <View style={styles.container}>
         <EmptyState
-          icon="archive-outline"
+          icon={<Archive size={64} color={colors.textTertiary} />}
           title="no archived items"
           description="items you archive will appear here"
         />
@@ -119,7 +120,7 @@ export default function ArchivedListingsScreen() {
         }
         ListEmptyComponent={
           <EmptyState
-            icon="archive-outline"
+            icon={<Archive size={64} color={colors.textTertiary} />}
             title="no archived items"
             description="items you archive will appear here"
           />
