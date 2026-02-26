@@ -28,6 +28,7 @@ const navigationTheme = {
 
 export default function AppNavigator() {
   const { user, loading } = useAuth();
+  console.log('[nav] AppNavigator render, user:', user?.uid ?? null, 'loading:', loading);
 
   if (loading) {
     return <LoadingSpinner />;

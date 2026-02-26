@@ -116,10 +116,17 @@
 - **tab label fix:** removed conflicting color in tabBarLabelStyle, use tint color props only
 - **needs install:** lucide-react-native + react-native-svg (code updated, deps not yet installed in WSL)
 
-## status as of session 8 (2026-02-16)
+## session 9: bug fixes & investigation (2026-02-26)
+- **FriendsScreen header color:** changed `color: colors.text` → `color: colors.white` in headerTitle style (same value, explicit per CLAUDE.md convention)
+- **logout investigation:** confirmed signOut code is correct -- no setLoading(true), auth state change propagates cleanly; logout was untestable due to stale Expo Go bundle
+- **web testing discovery:** user was testing via Expo Web (browser) -- colors and animations render differently on web vs iOS; web is not a reliable test environment for this app
+- **web warnings:** all deprecation warnings (`shadow*`, `tintColor`, `resizeMode`, `useNativeDriver`) come from react-navigation/react-native-paper internals, not our code
+- **shadows export:** confirmed `shadows` object in theme.ts is unused by any component
+
+## status as of session 9 (2026-02-26)
 - **working:** listing creation, auth, all screens on firebase, transaction flow, friends UI
 - **deployed:** firestore.rules, firestore.indexes.json, dotenv
-- **needs testing:** friends screens, lucide icon migration, logout fix
-- **needs install:** lucide-react-native + react-native-svg in WSL
+- **needs testing:** friends screens, lucide icon migration, logout -- all blocked on lucide install
+- **needs install:** lucide-react-native + react-native-svg in WSL (then rebuild with --clear)
 - **known limitation:** Alert.prompt iOS-only
 - **deferred:** firebase storage (paid plan), phone auth, push notifications

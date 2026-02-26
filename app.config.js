@@ -20,7 +20,7 @@ module.exports = {
     web: {
       bundler: 'metro',
     },
-    plugins: ['expo-asset', 'expo-font'],
+    plugins: ['expo-asset', 'expo-font', 'expo-web-browser'],
     extra: {
       EXPO_PUBLIC_FIREBASE_API_KEY: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
       EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,

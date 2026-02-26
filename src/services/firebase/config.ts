@@ -1,7 +1,8 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { initializeAuth, getAuth, getReactNativePersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import Constants from 'expo-constants';
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
 // Firebase configuration from environment variables
 // Try Constants.expoConfig.extra first (app.config.js), fall back to process.env
@@ -16,11 +17,20 @@ const firebaseConfig = {
   appId: extra?.EXPO_PUBLIC_FIREBASE_APP_ID || process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Guard against re-initialization on hot reload
+let app;
+let auth;
 
-// Initialize Firebase services
-export const auth = getAuth(app);
+if (getApps().length === 0) {
+  app = initializeApp(firebaseConfig);
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(ReactNativeAsyncStorage),
+  });
+} else {
+  app = getApp();
+  auth = getAuth(app);
+}
+
+export { auth };
 export const db = getFirestore(app);
-
 export default app;

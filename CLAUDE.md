@@ -1,6 +1,6 @@
 # CLAUDE.md - mark.it
 
-> last updated: 2026-02-16 (session 8)
+> last updated: 2026-02-26 (session 9)
 
 ---
 
@@ -145,7 +145,6 @@ all in `src/services/firebase/`
 - never silently change user input -- show inline error
 - skip success alerts -- navigate directly or to confirm screen
 - BeReal-style tabs: no underline indicator, color contrast only
-- tab label: must set explicit `color` in `tabBarLabelStyle`
 - group consecutive chat messages -- avatar on first only
 
 ### codebase rules

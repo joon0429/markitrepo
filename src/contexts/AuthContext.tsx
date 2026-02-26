@@ -32,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // listen for auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      console.log('[auth] onAuthStateChanged fired, user:', firebaseUser?.uid ?? null);
       setUser(firebaseUser);
 
       if (firebaseUser) {
@@ -81,11 +82,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    console.log('[auth] signOut called');
     setError(null);
     try {
       await firebaseSignOut(auth);
+      console.log('[auth] firebaseSignOut resolved');
       setUserProfile(null);
     } catch (err: any) {
+      console.log('[auth] signOut error:', err);
       setError('failed to sign out');
       throw err;
     }

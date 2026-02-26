@@ -5,6 +5,7 @@ import Button from '@components/common/Button';
 import Input from '@components/common/Input';
 import { colors, spacing, typography } from '@constants/theme';
 
+
 export default function LoginScreen() {
   const { signIn, signUp, loading, error, clearError } = useAuth();
 
@@ -79,6 +80,7 @@ export default function LoginScreen() {
                 : "don't have an account? create one"}
             </Text>
           </TouchableOpacity>
+
         </View>
 
       </ScrollView>
@@ -127,4 +129,5 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: typography.fontSize.sm,
   },
+
 });

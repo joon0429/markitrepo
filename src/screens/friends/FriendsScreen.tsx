@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.semibold,
-    color: colors.text,
+    color: colors.white,
   },
   container: {
     flex: 1,
