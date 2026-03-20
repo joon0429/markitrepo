@@ -1,6 +1,6 @@
 # CLAUDE.md - mark.it
 
-> last updated: 2026-02-26 (session 9)
+> last updated: 2026-03-13 (session 11)
 
 ---
 
@@ -9,7 +9,7 @@
 - **NEVER** use emojis or emoticons anywhere in this project (code, docs, comments, UI)
 - **text casing:** all regular text lowercase. only capitalize code identifiers, file names, or proper technical names
 - **NEVER** use `undefined` in firestore documents -- use `null` for optional fields (`field: type | null`, not `field?: type`)
-- **NEVER** run node/npx in this terminal -- user tests in WSL; claude code runs in git bash (windows)
+- **terminal:** macOS (native zsh) -- run node/npx directly, no WSL
 - **ALWAYS** check this document before writing code
 
 ---
@@ -19,7 +19,7 @@
 **mark.it** -- cross-platform mobile app (iOS + Android) for peer-to-peer selling among friends
 
 - **stack:** React Native (Expo managed workflow), TypeScript, Firebase (Auth, Firestore, Storage, FCM)
-- **dev env:** ubuntu terminal (WSL on windows) for testing; claude code in git bash (windows)
+- **dev env:** macOS (Apple Silicon M5) -- native terminal, iOS Simulator for testing
 - **firebase project:** markit-80348
 
 ---
@@ -128,6 +128,12 @@ all in `src/services/firebase/`
 - migration scripts must be idempotent (check before migrating, handle null/empty)
 - `require('dotenv').config()` MUST be at top of app.config.js or firebase config is undefined
 
+### firebase + expo / metro gotchas
+- `npm install` must run before `npx expo install` on a fresh machine -- otherwise deps like dotenv won't be found
+- Firebase v10+ uses package exports in package.json causing Metro to pick up ESM files Hermes can't run -- fix: `config.resolver.unstable_enablePackageExports = false` in `metro.config.js`
+- `initializeAuth` + `getReactNativePersistence` causes "Component auth has not been registered yet" crash on iOS Simulator with Hermes -- use `getAuth(app)` instead (no persistence across full app kills, but works)
+- import `./src/services/firebase/config` as the second import in App.tsx (after gesture handler) to guarantee Firebase initializes before any other module
+
 ### react native gotchas
 - navigation params must be serializable (ISO strings, not Timestamps)
 - `colors.background` is dark in dark mode -- use `'#FFFFFF'` for text on primary buttons
@@ -136,7 +142,7 @@ all in `src/services/firebase/`
 - Alert.prompt is iOS-only -- need custom modal for Android
 - KeyboardAvoidingView needs platform-specific behavior + offset for chat
 - horizontal ScrollView: wrap in View to prevent flex expansion
-- after config changes: `npx expo start --clear` in WSL
+- after config changes: `npx expo start --clear` in terminal
 
 ### UI/UX rules
 - NEVER use emojis as icons -- lucide-react-native only (Ionicons removed)
@@ -179,15 +185,15 @@ all in `src/services/firebase/`
 analytics, QR codes, reputation, search, maps, in-app payments, price edit notifications
 
 ### next steps
-1. **install deps in WSL** -- `npx expo install react-native-svg` + `npm install lucide-react-native`
-2. **device testing** -- test friends screens, add friends search, icon migration, logout
-3. **seed data** -- run seed.ts (needs user UIDs updated)
-4. **cross-platform closet modal** -- replace iOS-only Alert.prompt
+1. **simulator testing** -- test friends screens, add friends search, icon migration, logout (iOS Simulator running)
+2. **seed data** -- run seed.ts (needs user UIDs updated)
+3. **restore auth persistence** -- re-add `initializeAuth` + `getReactNativePersistence` once app is stable
+4. **cross-platform closet modal** -- replace iOS-only Alert.prompt (lower priority)
 
 ### current status
-- **working:** auth, listing creation, all screens on firebase, transaction flow, friends UI
-- **needs testing:** friends screens (followers/following/requests/add), lucide icon migration, logout fix
-- **needs install:** lucide-react-native + react-native-svg (not yet installed in WSL)
+- **working:** iOS Simulator running, Firebase auth fixed, all deps installed (react-native-svg, lucide-react-native)
+- **needs testing:** friends screens (followers/following/requests/add), lucide icon migration, logout, full auth flow
+- **known tradeoff:** auth state not persisted across full app kills (using `getAuth` not `initializeAuth`)
 - **deferred:** firebase storage (paid plan), phone auth, push notifications
 
 ---

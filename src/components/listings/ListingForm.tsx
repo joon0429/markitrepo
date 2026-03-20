@@ -6,8 +6,6 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
   Alert,
   Switch,
 } from 'react-native';
@@ -230,14 +228,13 @@ export default function ListingForm({
   const photoCount = photos.filter(p => p.uri).length;
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <View style={styles.container}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={true}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets={true}
       >
         {/* photo picker */}
         <View style={styles.section}>
@@ -371,7 +368,7 @@ export default function ListingForm({
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 

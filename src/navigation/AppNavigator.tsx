@@ -45,6 +45,7 @@ export default function AppNavigator() {
               component={CreateListingScreen}
               options={{
                 presentation: 'modal',
+                gestureEnabled: false,
                 headerShown: true,
                 headerTitle: 'sell an item',
                 headerBackTitle: 'cancel',

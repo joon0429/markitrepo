@@ -123,6 +123,27 @@
 - **web warnings:** all deprecation warnings (`shadow*`, `tintColor`, `resizeMode`, `useNativeDriver`) come from react-navigation/react-native-paper internals, not our code
 - **shadows export:** confirmed `shadows` object in theme.ts is unused by any component
 
+## session 10: platform migration (2026-03-13)
+- **new machine:** migrated from windows PC (WSL + git bash) to macbook M5 (native macOS)
+- **dev env change:** WSL/git bash removed from all docs -- running node/npx natively in zsh
+- **test env change:** switched from Expo Go (web/windows) to iOS Simulator on macOS
+- **docs updated:** CLAUDE.md, README.md, DEVLOG.md reflect new mac-native setup
+- **no code changes** -- all previous work carries over unchanged
+
+## session 11: iOS simulator setup & firebase auth fix (2026-03-13)
+- **deps installed:** `npm install` (dotenv was missing on new machine), then `react-native-svg` + `lucide-react-native`
+- **metro config:** created `metro.config.js` with `config.resolver.unstable_enablePackageExports = false` -- Firebase v10 package exports cause Metro to pick up ESM files that Hermes can't execute; this forces CJS resolution
+- **firebase auth fix:** removed `initializeAuth` + `getReactNativePersistence` from `config.ts`, replaced with `getAuth(app)` -- fixes "Component auth has not been registered yet" crash on iOS Simulator
+- **App.tsx:** added `import './src/services/firebase/config'` as second import to guarantee Firebase initializes before anything else
+- **tradeoff:** auth state no longer persists across full app kills (user must log in again) -- acceptable for testing, can revisit with `initializeAuth` + persistence once stable
+
+## status as of session 11 (2026-03-13)
+- **working:** iOS Simulator running, Firebase auth fixed, all deps installed
+- **deployed:** firestore.rules, firestore.indexes.json, dotenv, metro.config.js
+- **needs testing:** friends screens, lucide icon migration, logout, full auth flow on simulator
+- **known limitation:** auth state not persisted across app kills (by design for now); Alert.prompt iOS-only
+- **deferred:** firebase storage (paid plan), phone auth, push notifications, restore `initializeAuth` + persistence
+
 ## status as of session 9 (2026-02-26)
 - **working:** listing creation, auth, all screens on firebase, transaction flow, friends UI
 - **deployed:** firestore.rules, firestore.indexes.json, dotenv

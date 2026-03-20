@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:www.builder.io)",
-      "WebFetch(domain:lucide.dev)"
+      "WebFetch(domain:lucide.dev)",
+      "Bash(xcode-select -p)",
+      "Bash(xcrun simctl:*)",
+      "Bash(brew --version)",
+      "Bash(npm --version)",
+      "Bash(/opt/homebrew/bin/brew --version)"
     ]
   }
 }

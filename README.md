@@ -41,7 +41,7 @@ npm install
 # copy env and fill in firebase config
 cp .env.example .env
 
-# start dev server (in WSL if on windows)
+# start dev server
 npx expo start --clear
 ```
 

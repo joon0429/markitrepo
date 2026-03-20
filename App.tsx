@@ -1,4 +1,5 @@
 import 'react-native-gesture-handler';
+import './src/services/firebase/config';
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { PaperProvider, MD3DarkTheme } from 'react-native-paper';
