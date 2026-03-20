@@ -1,6 +1,6 @@
 # CLAUDE.md - mark.it
 
-> last updated: 2026-03-13 (session 11)
+> last updated: 2026-03-20 (session 12)
 
 ---
 
@@ -141,6 +141,9 @@ all in `src/services/firebase/`
 - ScrollView in flex container stretches -- wrap in plain View
 - Alert.prompt is iOS-only -- need custom modal for Android
 - KeyboardAvoidingView needs platform-specific behavior + offset for chat
+- `KeyboardAvoidingView` inside a modal (`presentation: 'modal'`) is unreliable on iOS -- use `automaticallyAdjustKeyboardInsets={true}` on the ScrollView + plain `View` wrapper instead
+- `presentation: 'modal'` swipe-to-dismiss gesture intercepts ScrollView scroll events -- add `gestureEnabled: false` to modal screen options when the screen contains a ScrollView
+- `.env` file is not committed and must be recreated on each new machine from Firebase Console (project settings → your apps → SDK config)
 - horizontal ScrollView: wrap in View to prevent flex expansion
 - after config changes: `npx expo start --clear` in terminal
 
@@ -191,7 +194,7 @@ analytics, QR codes, reputation, search, maps, in-app payments, price edit notif
 4. **cross-platform closet modal** -- replace iOS-only Alert.prompt (lower priority)
 
 ### current status
-- **working:** iOS Simulator running, Firebase auth fixed, all deps installed (react-native-svg, lucide-react-native)
+- **working:** iOS Simulator running, Firebase auth + .env configured, all deps installed, sell an item scrolling fixed
 - **needs testing:** friends screens (followers/following/requests/add), lucide icon migration, logout, full auth flow
 - **known tradeoff:** auth state not persisted across full app kills (using `getAuth` not `initializeAuth`)
 - **deferred:** firebase storage (paid plan), phone auth, push notifications

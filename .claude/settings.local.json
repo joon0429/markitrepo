@@ -7,7 +7,8 @@
       "Bash(xcrun simctl:*)",
       "Bash(brew --version)",
       "Bash(npm --version)",
-      "Bash(/opt/homebrew/bin/brew --version)"
+      "Bash(/opt/homebrew/bin/brew --version)",
+      "Bash(ls -1 /Users/jkwon/markitrepo/src/components/**/*.tsx)"
     ]
   }
 }

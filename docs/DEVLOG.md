@@ -137,6 +137,18 @@
 - **App.tsx:** added `import './src/services/firebase/config'` as second import to guarantee Firebase initializes before anything else
 - **tradeoff:** auth state no longer persists across full app kills (user must log in again) -- acceptable for testing, can revisit with `initializeAuth` + persistence once stable
 
+## session 12: firebase env fix + sell an item scroll fix (2026-03-20)
+- **.env created:** Firebase credentials added on new machine (markit-80348 project -- get from Firebase Console → project settings → your apps → SDK config)
+- **scroll fix:** `ListingForm` was unscrollable as a modal -- replaced `KeyboardAvoidingView` with plain `View` + `automaticallyAdjustKeyboardInsets={true}` on ScrollView (RN 0.81 native iOS keyboard handling)
+- **modal gesture fix:** added `gestureEnabled: false` to CreateListing modal options in AppNavigator -- iOS swipe-to-dismiss was intercepting ScrollView scroll events
+
+## status as of session 12 (2026-03-20)
+- **working:** iOS Simulator running, Firebase auth + .env configured, all deps installed, sell an item scrolling fixed
+- **deployed:** firestore.rules, firestore.indexes.json, dotenv, metro.config.js
+- **needs testing:** friends screens, lucide icon migration, logout, full auth flow on simulator
+- **known limitation:** auth state not persisted across app kills (by design for now); Alert.prompt iOS-only
+- **deferred:** firebase storage (paid plan), phone auth, push notifications, restore `initializeAuth` + persistence
+
 ## status as of session 11 (2026-03-13)
 - **working:** iOS Simulator running, Firebase auth fixed, all deps installed
 - **deployed:** firestore.rules, firestore.indexes.json, dotenv, metro.config.js
